@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.paging.compose)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
 
