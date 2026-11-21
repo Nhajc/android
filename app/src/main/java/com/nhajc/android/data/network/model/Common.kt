@@ -15,3 +15,6 @@ data class ProblemDetail(
     val status: Int? = null,
     val detail: String? = null
 )
+
+@Serializable
+data object UnknownItem : SearchItemResponse, LibraryItemResponse

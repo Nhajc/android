@@ -18,7 +18,7 @@ interface LibraryApi {
     @GET("library")
     suspend fun getLibrary(
         @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort?,
+        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<LibraryItemResponse>
@@ -26,7 +26,7 @@ interface LibraryApi {
     @GET("library/releases")
     suspend fun getReleases(
         @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort?,
+        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<ReleaseSummaryResponse>
@@ -34,8 +34,8 @@ interface LibraryApi {
     @GET("library/playlists")
     suspend fun getPlaylists(
         @Query("q") q: String?,
-        @Query("owned") owned: Boolean?,
-        @Query("sort") sort: LibrarySort?,
+        @Query("owned") owned: Boolean,
+        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<PlaylistSummaryResponse>
@@ -43,7 +43,7 @@ interface LibraryApi {
     @GET("library/artists")
     suspend fun getArtists(
         @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort?,
+        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<ArtistSummaryResponse>
@@ -51,7 +51,7 @@ interface LibraryApi {
     @GET("library/songs")
     suspend fun getSongs(
         @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort?,
+        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<SongResponse>
