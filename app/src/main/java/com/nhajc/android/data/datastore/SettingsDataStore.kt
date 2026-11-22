@@ -16,7 +16,7 @@ val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "settings"
 )
 
-class SettingsRepository(
+class SettingsDataStore(
     private val dataStore: DataStore<Preferences>
 ) {
     private val audioQualityKey = stringPreferencesKey("audio_quality")
