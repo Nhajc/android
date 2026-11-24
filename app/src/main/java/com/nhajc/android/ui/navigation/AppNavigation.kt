@@ -9,6 +9,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
@@ -55,6 +56,7 @@ import com.nhajc.android.ui.admin.AdminRoute
 import com.nhajc.android.ui.downloads.DownloadsScreen
 import com.nhajc.android.ui.home.HomeScreen
 import com.nhajc.android.ui.library.LibraryScreen
+import com.nhajc.android.ui.player.MiniPlayer
 import com.nhajc.android.ui.player.PlayerScreen
 import com.nhajc.android.ui.search.SearchRoute
 import com.nhajc.android.ui.settings.SettingsScreen
@@ -136,33 +138,48 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
     }
 
     val currentDestination = destinations.lastOrNull { it.navKey in backStack } ?: TopLevelDestination.HOME
+    val isPlayerOpen = backStack.last() == PlayerNavKey
+    val isAdminOpen = backStack.last() == AdminNavKey
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         bottomBar = {
-            NavigationBar {
-                destinations.forEach { destination ->
-                    val selected = destination == currentDestination
+            if (!isPlayerOpen) {
+                Column {
+                    if (!isAdminOpen) {
+                        MiniPlayer(onOpen = { backStack.add(PlayerNavKey) })
+                    }
 
-                    NavigationBarItem(
-                        selected = selected,
-                        enabled = !adminBusy,
-                        onClick = {
-                            if (adminBusy || backStack.lastOrNull() == destination.navKey) return@NavigationBarItem
-                            backStack.retainAll { it == HomeNavKey }
+                    NavigationBar {
+                        destinations.forEach { destination ->
+                            val selected = destination == currentDestination
 
-                            if (destination != TopLevelDestination.HOME) {
-                                backStack.add(destination.navKey)
+                            val icon = if (selected) {
+                                destination.selectedIcon
+                            } else {
+                                destination.icon
                             }
-                        },
-                        icon = {
-                            Icon(
-                                if (selected) destination.selectedIcon else destination.icon,
-                                contentDescription = null
+
+                            NavigationBarItem(
+                                selected = selected,
+                                enabled = !adminBusy,
+                                onClick = {
+                                    if (adminBusy || backStack.lastOrNull() == destination.navKey) {
+                                        return@NavigationBarItem
+                                    }
+                                    backStack.retainAll { it == HomeNavKey }
+
+                                    if (destination != TopLevelDestination.HOME) {
+                                        backStack.add(destination.navKey)
+                                    }
+                                },
+                                icon = {
+                                    Icon(icon, contentDescription = null)
+                                },
+                                label = { Text(stringResource(destination.label)) }
                             )
-                        },
-                        label = { Text(stringResource(destination.label)) }
-                    )
+                        }
+                    }
                 }
             }
         }
