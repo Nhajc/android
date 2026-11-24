@@ -12,10 +12,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.data.model.SearchCategory
 import com.nhajc.android.data.repository.SearchRepository
+import kotlin.uuid.Uuid
 
 @Composable
 fun SearchRoute(
     repository: SearchRepository,
+    onOpenArtist: (Uuid) -> Unit,
     playbackViewModel: SearchPlaybackViewModel = hiltViewModel()
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -45,6 +47,7 @@ fun SearchRoute(
             if (index >= 0) {
                 playbackViewModel.play(songs, index)
             }
-        }
+        },
+        onArtistClick = { item -> onOpenArtist(Uuid.parse(item.id)) }
     )
 }

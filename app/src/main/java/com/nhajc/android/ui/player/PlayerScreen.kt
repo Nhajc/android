@@ -2,6 +2,7 @@ package com.nhajc.android.ui.player
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -69,10 +70,15 @@ import com.nhajc.android.R
 import com.nhajc.android.data.model.ArtistSummary
 import com.nhajc.android.ui.common.CoverImage
 import com.nhajc.android.ui.common.message
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.launch
 
 @Composable
-fun PlayerScreen(onClose: () -> Unit, viewModel: PlayerViewModel = hiltViewModel()) {
+fun PlayerScreen(
+    onClose: () -> Unit,
+    onOpenArtist: (Uuid) -> Unit,
+    viewModel: PlayerViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val player by viewModel.player.collectAsStateWithLifecycle()
 
@@ -88,7 +94,8 @@ fun PlayerScreen(onClose: () -> Unit, viewModel: PlayerViewModel = hiltViewModel
         onSongChange = viewModel::onSongChange,
         onFavoriteClick = viewModel::onFavoriteClick,
         onErrorShown = viewModel::onErrorShown,
-        onClose = onClose
+        onClose = onClose,
+        onOpenArtist = onOpenArtist
     )
 }
 
@@ -102,6 +109,7 @@ internal fun PlayerScreen(
     onFavoriteClick: () -> Unit,
     onErrorShown: () -> Unit,
     onClose: () -> Unit,
+    onOpenArtist: (Uuid) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val mediaItemState = rememberCurrentMediaItemState(player)
@@ -208,7 +216,7 @@ internal fun PlayerScreen(
                     )
 
                     if (song != null) {
-                        ArtistLine(song.artists)
+                        ArtistLine(song.artists, onOpenArtist)
                     } else {
                         Text(
                             text = metadata.artist?.toString().orEmpty(),
@@ -252,8 +260,17 @@ internal fun PlayerScreen(
 }
 
 @Composable
-private fun ArtistLine(artists: List<ArtistSummary>) {
+private fun ArtistLine(artists: List<ArtistSummary>, onOpenArtist: (Uuid) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
     Row(
+        modifier = Modifier.clickable {
+            if (artists.size == 1) {
+                onOpenArtist(artists.first().id)
+            } else {
+                expanded = true
+            }
+        },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -276,6 +293,18 @@ private fun ArtistLine(artists: List<ArtistSummary>) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            for (artist in artists) {
+                DropdownMenuItem(
+                    text = { Text(artist.name) },
+                    onClick = {
+                        expanded = false
+                        onOpenArtist(artist.id)
+                    }
+                )
+            }
+        }
     }
 }
 

@@ -53,6 +53,7 @@ import com.nhajc.android.data.repository.SearchRepository
 import com.nhajc.android.ui.auth.LoginScreen
 import com.nhajc.android.ui.auth.RegisterScreen
 import com.nhajc.android.ui.admin.AdminRoute
+import com.nhajc.android.ui.artist.ArtistScreen
 import com.nhajc.android.ui.downloads.DownloadsScreen
 import com.nhajc.android.ui.home.HomeScreen
 import com.nhajc.android.ui.library.LibraryScreen
@@ -60,6 +61,7 @@ import com.nhajc.android.ui.player.MiniPlayer
 import com.nhajc.android.ui.player.PlayerScreen
 import com.nhajc.android.ui.search.SearchRoute
 import com.nhajc.android.ui.settings.SettingsScreen
+import kotlin.uuid.Uuid
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -88,6 +90,9 @@ data object DownloadsNavKey : NavKey
 
 @Serializable
 data object PlayerNavKey : NavKey
+
+@Serializable
+data class ArtistNavKey(val id: Uuid) : NavKey
 
 private enum class TopLevelDestination(
     val navKey: NavKey,
@@ -197,13 +202,17 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                 }
 
                 entry<SearchNavKey>(metadata = fadeThroughMetadata()) {
-                    SearchRoute(searchRepository)
+                    SearchRoute(
+                        repository = searchRepository,
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) }
+                    )
                 }
 
                 entry<LibraryNavKey>(metadata = fadeThroughMetadata()) {
                     LibraryScreen(
                         onOpenSettings = { backStack.add(SettingsNavKey) },
-                        onOpenDownloads = { backStack.add(DownloadsNavKey) }
+                        onOpenDownloads = { backStack.add(DownloadsNavKey) },
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) }
                     )
                 }
 
@@ -223,7 +232,14 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                 }
 
                 entry<PlayerNavKey> {
-                    PlayerScreen(onClose = { backStack.removeLastOrNull() })
+                    PlayerScreen(
+                        onClose = { backStack.removeLastOrNull() },
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) }
+                    )
+                }
+
+                entry<ArtistNavKey> { key ->
+                    ArtistScreen(artistId = key.id, onBack = { backStack.removeLastOrNull() })
                 }
             }
         )

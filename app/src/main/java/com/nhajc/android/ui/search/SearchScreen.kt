@@ -72,7 +72,8 @@ fun SearchScreen(
     onSubmit: () -> Unit,
     onRetry: () -> Unit,
     onLoadMore: () -> Unit,
-    onSongClick: (SearchItemViewModel) -> Unit = {}
+    onSongClick: (SearchItemViewModel) -> Unit = {},
+    onArtistClick: (SearchItemViewModel) -> Unit = {}
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     Scaffold(modifier = Modifier.fillMaxSize().imePadding()) { padding ->
@@ -140,9 +141,11 @@ fun SearchScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Spacer(Modifier.height(8.dp))
                             }
-                            // TODO: open release, playlist and artist rows once their screens exist
+                            // TODO: open release and playlist rows once their screens exist
                             items(model.items, key = { "${it.category}:${it.id}" }) { item ->
-                                SearchResultRow(item, onClick = { onSongClick(item) })
+                                SearchResultRow(item, onClick = {
+                                    if (item.category == SearchCategory.ARTIST) onArtistClick(item) else onSongClick(item)
+                                })
                             }
                         }
                         if (model.error != null) item {
@@ -197,7 +200,7 @@ private fun SearchWelcome() {
 private fun SearchResultRow(item: SearchItemViewModel, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-            .clickable(enabled = item.song != null, onClick = onClick)
+            .clickable(enabled = item.song != null || item.category == SearchCategory.ARTIST, onClick = onClick)
             .background(MaterialTheme.colorScheme.surfaceContainerLow).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
