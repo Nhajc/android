@@ -1,6 +1,5 @@
 package com.nhajc.android.data.network
 
-import com.nhajc.android.data.model.LibrarySort
 import com.nhajc.android.data.network.model.ArtistSummaryResponse
 import com.nhajc.android.data.network.model.LibraryItemResponse
 import com.nhajc.android.data.network.model.PageResponse
@@ -17,41 +16,30 @@ import retrofit2.http.Query
 interface LibraryApi {
     @GET("library")
     suspend fun getLibrary(
-        @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<LibraryItemResponse>
 
     @GET("library/releases")
     suspend fun getReleases(
-        @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<ReleaseSummaryResponse>
 
     @GET("library/playlists")
     suspend fun getPlaylists(
-        @Query("q") q: String?,
-        @Query("owned") owned: Boolean,
-        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<PlaylistSummaryResponse>
 
     @GET("library/artists")
     suspend fun getArtists(
-        @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<ArtistSummaryResponse>
 
     @GET("library/songs")
     suspend fun getSongs(
-        @Query("q") q: String?,
-        @Query("sort") sort: LibrarySort,
         @Query("page") page: Int,
         @Query("size") size: Int
     ): PageResponse<SongResponse>
