@@ -14,7 +14,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.first
-import org.apache.commons.lang3.StringUtils
 
 @Singleton
 class QueueRepository @Inject constructor(
@@ -66,8 +65,6 @@ class QueueRepository @Inject constructor(
         return SavedQueue(songs, position)
     }
 }
-
-private fun searchText(text: String): String = StringUtils.stripAccents(text).lowercase()
 
 private fun Song.asInfo(): SongInfo {
     val favoritedAt = if (isFavorite) {

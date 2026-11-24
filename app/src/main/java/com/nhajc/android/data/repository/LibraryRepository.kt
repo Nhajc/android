@@ -216,7 +216,7 @@ private fun searchKey(query: String): String? {
     return searchText(trimmed)
 }
 
-private fun searchText(text: String): String = StringUtils.stripAccents(text).lowercase()
+internal fun searchText(text: String): String = StringUtils.stripAccents(text).lowercase()
 
 private fun UserSummaryResponse.asEntity() =
     UserEntity(id = id, username = username, avatarUrl = avatarUrl)
