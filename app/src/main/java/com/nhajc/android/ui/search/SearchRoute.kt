@@ -19,6 +19,7 @@ fun SearchRoute(
     repository: SearchRepository,
     onOpenArtist: (Uuid) -> Unit,
     onOpenRelease: (Uuid) -> Unit,
+    onOpenPlaylist: (Uuid) -> Unit,
     playbackViewModel: SearchPlaybackViewModel = hiltViewModel()
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -50,6 +51,7 @@ fun SearchRoute(
             }
         },
         onArtistClick = { item -> onOpenArtist(Uuid.parse(item.id)) },
-        onReleaseClick = { item -> onOpenRelease(Uuid.parse(item.id)) }
+        onReleaseClick = { item -> onOpenRelease(Uuid.parse(item.id)) },
+        onPlaylistClick = { item -> onOpenPlaylist(Uuid.parse(item.id)) }
     )
 }
