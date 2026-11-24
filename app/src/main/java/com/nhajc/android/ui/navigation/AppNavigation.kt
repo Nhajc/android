@@ -55,6 +55,7 @@ import com.nhajc.android.ui.admin.AdminRoute
 import com.nhajc.android.ui.downloads.DownloadsScreen
 import com.nhajc.android.ui.home.HomeScreen
 import com.nhajc.android.ui.library.LibraryScreen
+import com.nhajc.android.ui.player.PlayerScreen
 import com.nhajc.android.ui.search.SearchRoute
 import com.nhajc.android.ui.settings.SettingsScreen
 import kotlinx.serialization.Serializable
@@ -82,6 +83,9 @@ data object AdminNavKey : NavKey
 
 @Serializable
 data object DownloadsNavKey : NavKey
+
+@Serializable
+data object PlayerNavKey : NavKey
 
 private enum class TopLevelDestination(
     val navKey: NavKey,
@@ -199,6 +203,10 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                         onExit = { backStack.removeLastOrNull() },
                         onBusyChanged = { adminBusy = it }
                     )
+                }
+
+                entry<PlayerNavKey> {
+                    PlayerScreen(onClose = { backStack.removeLastOrNull() })
                 }
             }
         )

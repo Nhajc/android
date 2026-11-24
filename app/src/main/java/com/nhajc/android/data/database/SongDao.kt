@@ -10,8 +10,10 @@ import com.nhajc.android.data.database.model.DownloadChoice
 import com.nhajc.android.data.database.model.SongArtistCrossRef
 import com.nhajc.android.data.database.model.SongEntity
 import com.nhajc.android.data.database.model.SongInfo
+import com.nhajc.android.data.database.model.SongWithArtists
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SongDao {
@@ -23,6 +25,10 @@ interface SongDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertArtistsIfMissing(artists: List<SongArtistCrossRef>)
+
+    @Transaction
+    @Query("SELECT * FROM Songs WHERE id = :id")
+    fun observe(id: Uuid): Flow<SongWithArtists?>
 
     @Query("UPDATE Songs SET favoritedAt = NULL")
     suspend fun clearFavoritedAt()

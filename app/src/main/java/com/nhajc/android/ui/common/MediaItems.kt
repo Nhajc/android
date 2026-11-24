@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -45,12 +46,19 @@ fun MediaListItem(
     fallbackIcon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isRound: Boolean = false
+    isRound: Boolean = false,
+    isHighlighted: Boolean = false
 ) {
+    val titleColor = if (isHighlighted) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        Color.Unspecified
+    }
+
     ListItem(
         modifier = modifier.clickable(onClick = onClick),
         headlineContent = {
-            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(title, color = titleColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         supportingContent = if (subtitle == null) {
             null
