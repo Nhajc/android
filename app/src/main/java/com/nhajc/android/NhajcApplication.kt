@@ -1,10 +1,11 @@
 package com.nhajc.android
 
 import android.app.Application
-import com.nhajc.android.data.repository.SearchSession
+import com.nhajc.android.data.repository.SearchRepository
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 @HiltAndroidApp
 class NhajcApplication : Application() {
-    val searchSession by lazy { SearchSession() }
+    @Inject lateinit var searchRepository: SearchRepository
 }

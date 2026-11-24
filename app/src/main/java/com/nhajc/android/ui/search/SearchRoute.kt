@@ -10,16 +10,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.data.model.SearchCategory
-import com.nhajc.android.data.repository.SearchSession
+import com.nhajc.android.data.repository.SearchRepository
 
 @Composable
-fun SearchRoute(session: SearchSession) {
+fun SearchRoute(repository: SearchRepository) {
     var query by rememberSaveable { mutableStateOf("") }
-    var categoryName by rememberSaveable { mutableStateOf(SearchCategory.ALL.name) }
-    var showConnection by rememberSaveable { mutableStateOf(false) }
+    var categoryNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val scope = rememberCoroutineScope()
-    val controller = remember(session, scope) {
-        SearchController(session, scope, query, SearchCategory.valueOf(categoryName))
+    val controller = remember(repository, scope) {
+        SearchController(repository, scope, query, categoryNames.map(SearchCategory::valueOf).toSet())
     }
     val model by controller.model.collectAsStateWithLifecycle()
 
@@ -28,21 +27,12 @@ fun SearchRoute(session: SearchSession) {
     SearchScreen(
         model = model,
         onQueryChange = { query = it; controller.updateQuery(it) },
-        onCategoryChange = { categoryName = it.name; controller.selectCategory(it) },
+        onCategoryChange = {
+            controller.selectCategory(it)
+            categoryNames = controller.model.value.categories.map { category -> category.name }
+        },
         onSubmit = controller::submit,
         onRetry = controller::retry,
-        onLoadMore = controller::loadMore,
-        onConnectionClick = { showConnection = true }
+        onLoadMore = controller::loadMore
     )
-
-    if (showConnection) {
-        SearchConnectionDialog(
-            model = model,
-            onDismiss = { controller.cancelConnection(); showConnection = false },
-            onUseSample = { controller.useSample(); showConnection = false },
-            onConnect = { address, username, password ->
-                controller.connect(address, username, password) { showConnection = false }
-            }
-        )
-    }
 }
