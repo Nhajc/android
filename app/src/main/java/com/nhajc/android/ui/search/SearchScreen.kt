@@ -1,6 +1,7 @@
 package com.nhajc.android.ui.search
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,7 +71,8 @@ fun SearchScreen(
     onCategoryChange: (SearchCategory) -> Unit,
     onSubmit: () -> Unit,
     onRetry: () -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
+    onSongClick: (SearchItemViewModel) -> Unit = {}
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     Scaffold(modifier = Modifier.fillMaxSize().imePadding()) { padding ->
@@ -138,8 +140,9 @@ fun SearchScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Spacer(Modifier.height(8.dp))
                             }
+                            // TODO: open release, playlist and artist rows once their screens exist
                             items(model.items, key = { "${it.category}:${it.id}" }) { item ->
-                                SearchResultRow(item)
+                                SearchResultRow(item, onClick = { onSongClick(item) })
                             }
                         }
                         if (model.error != null) item {
@@ -191,9 +194,10 @@ private fun SearchWelcome() {
 }
 
 @Composable
-private fun SearchResultRow(item: SearchItemViewModel) {
+private fun SearchResultRow(item: SearchItemViewModel, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+            .clickable(enabled = item.song != null, onClick = onClick)
             .background(MaterialTheme.colorScheme.surfaceContainerLow).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)

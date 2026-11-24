@@ -16,7 +16,8 @@ data class SearchItemViewModel(
     val ownerName: String? = null,
     val releaseTitle: String? = null,
     val durationSeconds: Int? = null,
-    val songCount: Int? = null
+    val songCount: Int? = null,
+    val song: Song? = null
 )
 
 data class SearchPageViewModel(
