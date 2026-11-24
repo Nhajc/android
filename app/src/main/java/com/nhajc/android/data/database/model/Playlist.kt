@@ -6,6 +6,7 @@ import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.Relation
+import com.nhajc.android.data.model.Playlist
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -66,4 +67,12 @@ data class PlaylistWithOwner(
     @Embedded val playlist: PlaylistEntity,
     @Relation(parentColumns = ["ownerId"], entityColumns = ["id"])
     val owner: UserEntity
+)
+
+fun PlaylistWithOwner.asModel(): Playlist = Playlist(
+    id = playlist.info.id,
+    title = playlist.info.title,
+    coverUrl = playlist.info.coverUrl,
+    isPrivate = playlist.info.isPrivate,
+    owner = owner.asModel()
 )

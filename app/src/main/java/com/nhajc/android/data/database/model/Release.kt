@@ -6,6 +6,7 @@ import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.Junction
 import androidx.room3.Relation
+import com.nhajc.android.data.model.Release
 import com.nhajc.android.data.model.ReleaseType
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -63,3 +64,17 @@ data class ReleaseWithArtists(
     @Relation(parentColumns = ["id"], entityColumns = ["releaseId"])
     val credits: List<ReleaseArtistCrossRef>
 )
+
+fun ReleaseWithArtists.asModel(): Release {
+    val positions = credits.associate { it.artistId to it.position }
+    val sortedArtists = artists.sortedBy { positions[it.id] }
+
+    return Release(
+        id = release.info.id,
+        title = release.info.title,
+        releaseType = release.info.releaseType,
+        releaseDate = release.info.releaseDate,
+        coverUrl = release.info.coverUrl,
+        artists = sortedArtists.map { it.asModel() }
+    )
+}

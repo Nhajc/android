@@ -3,6 +3,8 @@ package com.nhajc.android.data.model
 import kotlin.uuid.Uuid
 import kotlinx.datetime.LocalDate
 
+data class ArtistSummary(val id: Uuid, val name: String, val avatarUrl: String?)
+
 data class Artist(
     val id: Uuid,
     val name: String,

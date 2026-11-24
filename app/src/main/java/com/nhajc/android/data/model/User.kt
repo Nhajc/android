@@ -10,4 +10,6 @@ data class User(
     val avatarUrl: String?
 )
 
+data class UserSummary(val id: Uuid, val username: String, val avatarUrl: String?)
+
 enum class UserRole { USER, ADMIN }
