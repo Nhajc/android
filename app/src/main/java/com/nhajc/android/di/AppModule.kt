@@ -7,7 +7,9 @@ import com.nhajc.android.BuildConfig
 import com.nhajc.android.data.database.AppDatabase
 import com.nhajc.android.data.datastore.SessionDataStore
 import com.nhajc.android.data.datastore.sessionDataStore
+import com.nhajc.android.data.network.ArtistApi
 import com.nhajc.android.data.network.AuthApi
+import com.nhajc.android.data.network.LibraryApi
 import com.nhajc.android.data.network.TokenAuthenticator
 import com.nhajc.android.data.network.TokenInterceptor
 import com.nhajc.android.data.network.UserApi
@@ -57,6 +59,14 @@ object AppModule {
     @Provides
     @Singleton
     fun userApi(retrofit: Retrofit): UserApi = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun artistApi(retrofit: Retrofit): ArtistApi = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun libraryApi(retrofit: Retrofit): LibraryApi = retrofit.create()
 
     @Provides
     @Singleton

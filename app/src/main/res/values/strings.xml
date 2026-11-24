@@ -50,4 +50,25 @@
     <string name="error_session_ended">Your session has ended. Log in again.</string>
     <string name="error_network">Can\'t reach Nhajc. Try again.</string>
     <string name="error_server">Nhajc is having problems. Try again later.</string>
+    <string name="artist_title">Artist</string>
+    <string name="artist_loading">Loading artist…</string>
+    <string name="artist_retry">Try again</string>
+    <string name="artist_follow">Follow</string>
+    <string name="artist_following">Following</string>
+    <string name="artist_releases">Releases</string>
+    <string name="artist_no_releases">No releases yet</string>
+    <string name="artist_release_metadata">%1$s · %2$d · %3$s</string>
+    <string name="artist_release_album">Album</string>
+    <string name="artist_release_single">Single</string>
+    <string name="artist_release_ep">EP</string>
+    <string name="artist_release_compilation">Compilation</string>
+    <string name="artist_release_unknown">Release</string>
+    <string name="artist_error_network">Unable to reach Nhajc. Please try again.</string>
+    <string name="artist_error_not_found">This artist is no longer available.</string>
+    <string name="artist_error_forbidden">You do not have permission to view this artist.</string>
+    <string name="artist_error_response">Unable to read the artist information.</string>
+    <plurals name="artist_song_count">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
 </resources>
