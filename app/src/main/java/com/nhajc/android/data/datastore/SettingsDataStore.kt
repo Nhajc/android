@@ -19,6 +19,10 @@ val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
 class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
     private val audioQualityKey = stringPreferencesKey("audio_quality")
 
+    private val themeModeKey = stringPreferencesKey("theme_mode")
+
+    private val downloadQualityKey = stringPreferencesKey("download_quality")
+
     private val preferences: Flow<Preferences> = dataStore.data.catch { exception ->
         if (exception is IOException) {
             emit(emptyPreferences())
@@ -33,9 +37,35 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
         parseAudioQuality(storedName)
     }
 
+    val themeMode: Flow<ThemeMode> = preferences.map { values ->
+        val storedName = values[themeModeKey]
+
+        ThemeMode.entries.firstOrNull { mode ->
+            mode.name == storedName
+        } ?: ThemeMode.SYSTEM
+    }
+
+    val downloadQuality: Flow<AudioQuality> = preferences.map { values ->
+        val storedName = values[downloadQualityKey]
+
+        parseAudioQuality(storedName)
+    }
+
     suspend fun setAudioQuality(quality: AudioQuality) {
         dataStore.edit { values ->
             values[audioQualityKey] = quality.name
+        }
+    }
+
+    suspend fun setThemeMode(mode: ThemeMode) {
+        dataStore.edit { values ->
+            values[themeModeKey] = mode.name
+        }
+    }
+
+    suspend fun setDownloadQuality(quality: AudioQuality) {
+        dataStore.edit { values ->
+            values[downloadQualityKey] = quality.name
         }
     }
 
@@ -46,6 +76,6 @@ class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
             }
         }
 
-        return AudioQuality.AUTO
+        return AudioQuality.LOSSLESS
     }
 }
