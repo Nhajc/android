@@ -402,7 +402,8 @@ private fun LibraryScreenPreview() {
             releaseType = ReleaseType.ALBUM,
             releaseDate = LocalDate(2026, 1, 1),
             coverUrl = null,
-            artists = listOf(ArtistSummary(Uuid.random(), "Artist A", null))
+            artists = listOf(ArtistSummary(Uuid.random(), "Artist A", null)),
+            isSaved = true
         ),
         Release(
             id = Uuid.random(),
@@ -410,7 +411,8 @@ private fun LibraryScreenPreview() {
             releaseType = ReleaseType.SINGLE,
             releaseDate = LocalDate(2026, 2, 1),
             coverUrl = null,
-            artists = emptyList()
+            artists = emptyList(),
+            isSaved = true
         )
     )
 
