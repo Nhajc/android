@@ -25,6 +25,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val serverUrl = providers.gradleProperty("nhajc.serverUrl").getOrElse("http://localhost:8080/api/v1/")
+        buildConfigField("String", "BASE_URL", "\"$serverUrl\"")
     }
 
     buildTypes {
@@ -40,6 +43,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }

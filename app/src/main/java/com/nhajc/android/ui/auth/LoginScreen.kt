@@ -1,6 +1,7 @@
-package com.nhajc.android.ui.login
+package com.nhajc.android.ui.auth
 
 import android.content.res.Configuration
+import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,32 +53,48 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.R
-import com.nhajc.android.data.model.LoginViewModel
+import com.nhajc.android.data.model.UserError
+import com.nhajc.android.ui.common.message
 import com.nhajc.android.ui.theme.NhajcTheme
 
 @Composable
-fun LoginScreen(
-    model: LoginViewModel,
+fun LoginScreen(onRegister: () -> Unit, viewModel: LoginViewModel = hiltViewModel()) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LoginScreen(
+        uiState = uiState,
+        onUsernameOrEmailChange = viewModel::onUsernameOrEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onLogin = viewModel::login,
+        onRegister = onRegister
+    )
+}
+
+@Composable
+internal fun LoginScreen(
+    uiState: LoginUiState,
     onUsernameOrEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLogin: () -> Unit,
     onRegister: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val canSubmit = !model.isLoading &&
-            model.usernameOrEmail.isNotBlank() &&
-            model.password.isNotBlank()
+    val canSubmit = !uiState.isLoading &&
+        uiState.usernameOrEmail.isNotBlank() &&
+        uiState.password.isNotEmpty()
 
     AuthContainer(
         title = stringResource(R.string.login_title),
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = model.usernameOrEmail,
+            value = uiState.usernameOrEmail,
             onValueChange = onUsernameOrEmailChange,
             modifier = Modifier.fillMaxWidth(),
-            enabled = !model.isLoading,
+            enabled = !uiState.isLoading,
             singleLine = true,
             label = { Text(stringResource(R.string.username_or_email)) },
             leadingIcon = {
@@ -91,15 +108,22 @@ fun LoginScreen(
         )
 
         PasswordInput(
-            value = model.password,
+            value = uiState.password,
             onValueChange = onPasswordChange,
-            enabled = !model.isLoading,
+            enabled = !uiState.isLoading,
             onSubmit = {
                 if (canSubmit) {
                     onLogin()
                 }
             }
         )
+
+        if (uiState.error != null) {
+            Text(
+                text = stringResource(uiState.error.message()),
+                color = MaterialTheme.colorScheme.error
+            )
+        }
 
         Button(
             onClick = onLogin,
@@ -111,7 +135,7 @@ fun LoginScreen(
                 disabledContentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
-            if (model.isLoading) {
+            if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(22.dp),
                     color = MaterialTheme.colorScheme.onPrimary,
@@ -129,7 +153,7 @@ fun LoginScreen(
         OutlinedButton(
             onClick = onRegister,
             modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-            enabled = !model.isLoading,
+            enabled = !uiState.isLoading,
             shape = CircleShape,
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface
@@ -138,115 +162,6 @@ fun LoginScreen(
             Text(stringResource(R.string.sign_up))
         }
     }
-}
-
-@Composable
-internal fun AuthContainer(
-    title: String,
-    modifier: Modifier = Modifier,
-    onBack: (() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Surface(modifier = modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .safeDrawingPadding()
-                .imePadding()
-                .verticalScroll(rememberScrollState()),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 440.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                if (onBack != null) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                }
-
-                Text(
-                    text = title,
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-
-                content()
-            }
-        }
-    }
-}
-
-@Composable
-internal fun PasswordInput(
-    value: String,
-    onValueChange: (String) -> Unit,
-    enabled: Boolean,
-    onSubmit: () -> Unit
-) {
-    var isVisible by rememberSaveable { mutableStateOf(false) }
-
-    val transformation = if (isVisible) {
-        VisualTransformation.None
-    } else {
-        PasswordVisualTransformation()
-    }
-
-    val visibilityIcon = if (isVisible) {
-        Icons.Outlined.VisibilityOff
-    } else {
-        Icons.Outlined.Visibility
-    }
-
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = enabled,
-        singleLine = true,
-        label = { Text(stringResource(R.string.password)) },
-        leadingIcon = {
-            Icon(Icons.Outlined.Lock, contentDescription = null)
-        },
-        trailingIcon = {
-            IconButton(
-                onClick = { isVisible = !isVisible },
-                enabled = enabled
-            ) {
-                Icon(
-                    imageVector = visibilityIcon,
-                    contentDescription = if (isVisible) {
-                        stringResource(R.string.hide_password)
-                    } else {
-                        stringResource(R.string.show_password)
-                    }
-                )
-            }
-        },
-        visualTransformation = transformation,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done,
-            autoCorrectEnabled = false
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                if (enabled) {
-                    onSubmit()
-                }
-            }
-        ),
-        shape = MaterialTheme.shapes.medium
-    )
 }
 
 @Preview(
@@ -263,16 +178,16 @@ internal fun PasswordInput(
 )
 @Composable
 private fun LoginScreenPreview() {
-    var model by remember { mutableStateOf(LoginViewModel()) }
+    var uiState by remember { mutableStateOf(LoginUiState()) }
 
     NhajcTheme(darkTheme = isSystemInDarkTheme()) {
         LoginScreen(
-            model = model,
+            uiState = uiState,
             onUsernameOrEmailChange = {
-                model = model.copy(usernameOrEmail = it)
+                uiState = uiState.copy(usernameOrEmail = it)
             },
             onPasswordChange = {
-                model = model.copy(password = it)
+                uiState = uiState.copy(password = it)
             },
             onLogin = {},
             onRegister = {}
