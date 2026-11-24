@@ -20,7 +20,12 @@ import androidx.compose.ui.res.stringResource
 import com.nhajc.android.R
 
 @Composable
-fun SongMenuButton(isFavorite: Boolean, isFavoriteEnabled: Boolean, onFavoriteClick: () -> Unit) {
+fun SongMenuButton(
+    isFavorite: Boolean,
+    isFavoriteEnabled: Boolean,
+    onFavoriteClick: () -> Unit,
+    onAddToPlaylistClick: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
@@ -53,8 +58,10 @@ fun SongMenuButton(isFavorite: Boolean, isFavoriteEnabled: Boolean, onFavoriteCl
                 leadingIcon = {
                     Icon(Icons.AutoMirrored.Outlined.PlaylistAdd, contentDescription = null)
                 },
-                // TODO: pick one of the user's playlists, then add the song with #31
-                onClick = { expanded = false }
+                onClick = {
+                    expanded = false
+                    onAddToPlaylistClick()
+                }
             )
 
             DropdownMenuItem(

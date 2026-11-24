@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -58,10 +59,12 @@ import androidx.media3.ui.compose.material3.indicator.PositionText
 import androidx.media3.ui.compose.material3.indicator.ProgressSlider
 import androidx.media3.ui.compose.state.rememberCurrentMediaItemState
 import com.nhajc.android.R
+import com.nhajc.android.data.model.Song
 import com.nhajc.android.ui.common.ArtistLine
 import com.nhajc.android.ui.common.CoverImage
 import com.nhajc.android.ui.common.SongMenuButton
 import com.nhajc.android.ui.common.message
+import com.nhajc.android.ui.playlist.AddToPlaylistSheet
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.launch
 
@@ -122,6 +125,7 @@ internal fun PlayerScreen(
     val scope = rememberCoroutineScope()
 
     var selectedTab by rememberSaveable { mutableStateOf(PlayerTab.UP_NEXT) }
+    var addingSong by remember { mutableStateOf<Song?>(null) }
 
     BackHandler(enabled = sheetState.currentValue == SheetValue.Expanded) {
         scope.launch { sheetState.partialExpand() }
@@ -181,7 +185,8 @@ internal fun PlayerScreen(
                     SongMenuButton(
                         isFavorite = song?.isFavorite == true,
                         isFavoriteEnabled = song != null && !uiState.isUpdatingFavorite,
-                        onFavoriteClick = onFavoriteClick
+                        onFavoriteClick = onFavoriteClick,
+                        onAddToPlaylistClick = { addingSong = song }
                     )
                 }
             )
@@ -262,6 +267,12 @@ internal fun PlayerScreen(
             }
         }
     }
+
+    AddToPlaylistSheet(
+        song = addingSong,
+        snackbarHostState = snackbarHostState,
+        onDismiss = { addingSong = null }
+    )
 }
 
 @Composable
