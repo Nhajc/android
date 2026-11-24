@@ -5,6 +5,7 @@ enum class AppError {
     USER_EXISTS,
     INVALID_INPUT,
     INVALID_AVATAR,
+    PLAYLIST_LIMIT,
     SESSION_ENDED,
     NETWORK,
     SERVER

@@ -50,6 +50,7 @@
     <string name="error_session_ended">Your session has ended. Log in again.</string>
     <string name="error_network">Can\'t reach Nhajc. Try again.</string>
     <string name="error_server">Nhajc is having problems. Try again later.</string>
+    <string name="error_playlist_limit">You can have up to 200 playlists.</string>
     <string name="artist_title">Artist</string>
     <string name="artist_loading">Loading artist…</string>
     <string name="artist_retry">Try again</string>

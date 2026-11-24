@@ -9,18 +9,19 @@ import com.nhajc.android.data.datastore.SessionDataStore
 import com.nhajc.android.data.datastore.sessionDataStore
 import com.nhajc.android.data.network.ArtistApi
 import com.nhajc.android.data.network.AuthApi
-import com.nhajc.android.data.network.LibraryApi
 import com.nhajc.android.data.network.GenreApi
+import com.nhajc.android.data.network.LibraryApi
+import com.nhajc.android.data.network.PlaylistApi
 import com.nhajc.android.data.network.ReleaseApi
+import com.nhajc.android.data.network.SearchApi
 import com.nhajc.android.data.network.SongApi
 import com.nhajc.android.data.network.TokenAuthenticator
 import com.nhajc.android.data.network.TokenInterceptor
 import com.nhajc.android.data.network.UserApi
-import com.nhajc.android.data.network.SearchApi
 import com.nhajc.android.data.network.networkJson
-import com.nhajc.android.data.repository.SettingsRepository
 import com.nhajc.android.data.repository.ApiSearchRepository
 import com.nhajc.android.data.repository.SearchRepository
+import com.nhajc.android.data.repository.SettingsRepository
 import com.nhajc.android.data.repository.settingsDataStore
 import dagger.Module
 import dagger.Provides
@@ -99,6 +100,10 @@ object AppModule {
     fun releaseApi(@Named("admin") retrofit: Retrofit): ReleaseApi = retrofit.create()
     @Provides
     fun songApi(@Named("admin") retrofit: Retrofit): SongApi = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun playlistApi(retrofit: Retrofit): PlaylistApi = retrofit.create()
 
     @Provides
     @Singleton

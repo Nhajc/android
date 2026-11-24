@@ -17,6 +17,9 @@ interface SongDao {
     @Upsert(entity = SongEntity::class)
     suspend fun upsertFromServer(songs: List<SongInfo>)
 
+    @Query("UPDATE Songs SET favoritedAt = NULL")
+    suspend fun clearFavoritedAt()
+
     @Query("UPDATE Songs SET favoritedAt = :favoritedAt WHERE id = :id")
     suspend fun setFavoritedAt(id: Uuid, favoritedAt: Instant?)
 
