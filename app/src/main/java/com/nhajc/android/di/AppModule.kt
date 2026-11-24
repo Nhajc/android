@@ -7,8 +7,9 @@ import com.nhajc.android.BuildConfig
 import com.nhajc.android.data.database.AppDatabase
 import com.nhajc.android.data.datastore.SessionDataStore
 import com.nhajc.android.data.datastore.sessionDataStore
-import com.nhajc.android.data.network.AuthApi
 import com.nhajc.android.data.network.ArtistApi
+import com.nhajc.android.data.network.AuthApi
+import com.nhajc.android.data.network.LibraryApi
 import com.nhajc.android.data.network.GenreApi
 import com.nhajc.android.data.network.ReleaseApi
 import com.nhajc.android.data.network.SongApi
@@ -68,6 +69,10 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun libraryApi(retrofit: Retrofit): LibraryApi = retrofit.create()
+
+    @Provides
+    @Singleton
     fun searchApi(retrofit: Retrofit): SearchApi = retrofit.create()
 
     @Provides
@@ -77,17 +82,23 @@ object AppModule {
     @Provides
     @Singleton
     @Named("admin")
-    fun adminRetrofit(client: OkHttpClient): Retrofit = retrofit(client.newBuilder()
-        .readTimeout(10, TimeUnit.MINUTES)
-        .writeTimeout(10, TimeUnit.MINUTES)
-        .callTimeout(15, TimeUnit.MINUTES)
-        .retryOnConnectionFailure(false)
-        .build())
+    fun adminRetrofit(client: OkHttpClient): Retrofit = retrofit(
+        client.newBuilder()
+            .readTimeout(10, TimeUnit.MINUTES)
+            .writeTimeout(10, TimeUnit.MINUTES)
+            .callTimeout(15, TimeUnit.MINUTES)
+            .retryOnConnectionFailure(false)
+            .build()
+    )
 
-    @Provides fun artistApi(@Named("admin") retrofit: Retrofit): ArtistApi = retrofit.create()
-    @Provides fun genreApi(@Named("admin") retrofit: Retrofit): GenreApi = retrofit.create()
-    @Provides fun releaseApi(@Named("admin") retrofit: Retrofit): ReleaseApi = retrofit.create()
-    @Provides fun songApi(@Named("admin") retrofit: Retrofit): SongApi = retrofit.create()
+    @Provides
+    fun artistApi(@Named("admin") retrofit: Retrofit): ArtistApi = retrofit.create()
+    @Provides
+    fun genreApi(@Named("admin") retrofit: Retrofit): GenreApi = retrofit.create()
+    @Provides
+    fun releaseApi(@Named("admin") retrofit: Retrofit): ReleaseApi = retrofit.create()
+    @Provides
+    fun songApi(@Named("admin") retrofit: Retrofit): SongApi = retrofit.create()
 
     @Provides
     @Singleton
