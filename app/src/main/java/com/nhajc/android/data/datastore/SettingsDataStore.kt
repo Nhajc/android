@@ -3,10 +3,10 @@ package com.nhajc.android.data.datastore
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -16,9 +16,7 @@ val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "settings"
 )
 
-class SettingsDataStore(
-    private val dataStore: DataStore<Preferences>
-) {
+class SettingsDataStore(private val dataStore: DataStore<Preferences>) {
     private val audioQualityKey = stringPreferencesKey("audio_quality")
 
     private val preferences: Flow<Preferences> = dataStore.data.catch { exception ->
