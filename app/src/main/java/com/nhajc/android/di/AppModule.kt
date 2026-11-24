@@ -13,8 +13,11 @@ import com.nhajc.android.data.network.LibraryApi
 import com.nhajc.android.data.network.TokenAuthenticator
 import com.nhajc.android.data.network.TokenInterceptor
 import com.nhajc.android.data.network.UserApi
+import com.nhajc.android.data.network.SearchApi
 import com.nhajc.android.data.network.networkJson
 import com.nhajc.android.data.repository.SettingsRepository
+import com.nhajc.android.data.repository.ApiSearchRepository
+import com.nhajc.android.data.repository.SearchRepository
 import com.nhajc.android.data.repository.settingsDataStore
 import dagger.Module
 import dagger.Provides
@@ -67,6 +70,14 @@ object AppModule {
     @Provides
     @Singleton
     fun libraryApi(retrofit: Retrofit): LibraryApi = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun searchApi(retrofit: Retrofit): SearchApi = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun searchRepository(api: SearchApi): SearchRepository = ApiSearchRepository(api)
 
     @Provides
     @Singleton

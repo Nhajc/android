@@ -39,7 +39,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.nhajc.android.R
-import com.nhajc.android.data.repository.SearchSession
+import com.nhajc.android.data.repository.SearchRepository
 import com.nhajc.android.ui.auth.LoginScreen
 import com.nhajc.android.ui.auth.RegisterScreen
 import com.nhajc.android.ui.home.HomeScreen
@@ -95,7 +95,7 @@ fun AuthNavigation() {
 }
 
 @Composable
-fun MainNavigation(searchSession: SearchSession) {
+fun MainNavigation(searchRepository: SearchRepository) {
     val backStack = rememberNavBackStack(HomeNavKey)
 
     val currentDestination = TopLevelDestination.entries.last { it.navKey in backStack }
@@ -139,7 +139,7 @@ fun MainNavigation(searchSession: SearchSession) {
                 }
 
                 entry<SearchNavKey>(metadata = fadeThroughMetadata()) {
-                    SearchRoute(searchSession)
+                    SearchRoute(searchRepository)
                 }
 
                 entry<LibraryNavKey>(metadata = fadeThroughMetadata()) {}
