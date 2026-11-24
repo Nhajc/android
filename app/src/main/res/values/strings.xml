@@ -96,11 +96,6 @@
     <string name="artist_releases">Releases</string>
     <string name="artist_no_releases">No releases yet</string>
     <string name="artist_release_metadata">%1$s · %2$d · %3$s</string>
-    <string name="artist_release_album">Album</string>
-    <string name="artist_release_single">Single</string>
-    <string name="artist_release_ep">EP</string>
-    <string name="artist_release_compilation">Compilation</string>
-    <string name="artist_release_unknown">Release</string>
     <string name="artist_error_network">Unable to reach Nhajc. Please try again.</string>
     <string name="artist_error_not_found">This artist is no longer available.</string>
     <string name="artist_error_forbidden">You do not have permission to view this artist.</string>

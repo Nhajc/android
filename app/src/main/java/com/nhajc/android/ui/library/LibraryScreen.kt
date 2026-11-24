@@ -57,6 +57,7 @@ import com.nhajc.android.ui.common.SearchTopBar
 import com.nhajc.android.ui.common.SortButton
 import com.nhajc.android.ui.common.UserAvatarButton
 import com.nhajc.android.ui.common.ViewStyleButton
+import com.nhajc.android.ui.common.label
 import com.nhajc.android.ui.common.message
 import com.nhajc.android.ui.theme.NhajcTheme
 import kotlin.uuid.Uuid
@@ -388,15 +389,6 @@ private fun LibrarySort.label(isPlaylist: Boolean): Int = when (this) {
 private fun ArtistSort.label(): Int = when (this) {
     ArtistSort.RECENT -> R.string.sort_recent
     ArtistSort.NAME -> R.string.sort_name
-}
-
-@StringRes
-private fun ReleaseType.label(): Int = when (this) {
-    ReleaseType.ALBUM -> R.string.release_type_album
-    ReleaseType.SINGLE -> R.string.release_type_single
-    ReleaseType.EP -> R.string.release_type_ep
-    ReleaseType.COMPILATION -> R.string.release_type_compilation
-    ReleaseType.UNKNOWN -> R.string.release_type_unknown
 }
 
 @Preview(name = "Library Light", uiMode = Configuration.UI_MODE_NIGHT_NO)
