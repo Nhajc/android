@@ -74,7 +74,7 @@ fun NhajcApp(uiState: MainActivityUiState) {
             if (uiState.isLoggedIn) {
                 val application = LocalContext.current.applicationContext as NhajcApplication
 
-                MainNavigation(application.searchSession)
+                MainNavigation(application.searchRepository)
             } else {
                 AuthNavigation()
             }

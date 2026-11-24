@@ -10,26 +10,45 @@ import com.nhajc.android.data.network.model.ReleaseSummaryResponse
 import com.nhajc.android.data.network.model.SearchItemResponse
 import com.nhajc.android.data.network.model.SongResponse
 import com.nhajc.android.data.network.model.UnknownItem
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 class ApiSearchRepository(private val api: SearchApi) : SearchRepository {
     override suspend fun search(
         query: String,
-        category: SearchCategory,
+        categories: Set<SearchCategory>,
         page: Int,
         size: Int
     ): SearchPageViewModel = repositoryCall {
         val keyword = validateSearch(query, page, size)
-        val response = when (category) {
-            SearchCategory.ALL -> api.search(keyword, page, size)
-            SearchCategory.SONG -> api.searchSongs(keyword, page, size)
-            SearchCategory.RELEASE -> api.searchReleases(keyword, page, size)
-            SearchCategory.PLAYLIST -> api.searchPlaylists(keyword, page, size)
-            SearchCategory.ARTIST -> api.searchArtists(keyword, page, size)
+        if (categories.isEmpty()) {
+            val response = api.search(keyword, page, size)
+            return@repositoryCall SearchPageViewModel(
+                response.content.mapNotNull { it.toViewModel() }, response.page, response.hasNext
+            )
+        }
+        // Each selected category advances one backend page at a time. Keep every
+        // returned item so combining filters never drops hits between pages.
+        val pages = coroutineScope {
+            SearchCategory.entries.filter { it in categories }.map { category ->
+                async {
+                    val response = when (category) {
+                        SearchCategory.SONG -> api.searchSongs(keyword, page, size)
+                        SearchCategory.RELEASE -> api.searchReleases(keyword, page, size)
+                        SearchCategory.PLAYLIST -> api.searchPlaylists(keyword, page, size)
+                        SearchCategory.ARTIST -> api.searchArtists(keyword, page, size)
+                    }
+                    SearchPageViewModel(
+                        response.content.mapNotNull { it.toViewModel() }, response.page, response.hasNext
+                    )
+                }
+            }.awaitAll()
         }
         SearchPageViewModel(
-            items = response.content.mapNotNull { it.toViewModel() },
-            page = response.page,
-            hasNext = response.hasNext
+            items = pages.flatMap { it.items },
+            page = page,
+            hasNext = pages.any { it.hasNext }
         )
     }
 }
