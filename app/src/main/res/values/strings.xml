@@ -51,6 +51,7 @@
     <string name="error_network">Can\'t reach Nhajc. Try again.</string>
     <string name="error_server">Nhajc is having problems. Try again later.</string>
     <string name="error_playlist_limit">You can have up to 200 playlists.</string>
+    <string name="error_playlist_full">A playlist can have up to 1000 songs.</string>
     <string name="error_not_found">This is no longer available.</string>
     <string name="try_again">Try again</string>
     <string name="close_search">Close search</string>

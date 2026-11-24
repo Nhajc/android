@@ -2,6 +2,7 @@ package com.nhajc.android.data.database
 
 import androidx.room3.Dao
 import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Upsert
@@ -31,6 +32,16 @@ interface PlaylistDao {
     )
     fun observeSongs(id: Uuid): Flow<List<SongWithArtists>>
 
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM Playlists
+        WHERE ownerId = :ownerId AND isRemoteRemoved = 0
+        ORDER BY lastActivityAt DESC, id
+        """
+    )
+    fun observeOwned(ownerId: Uuid): Flow<List<PlaylistWithOwner>>
+
     @Upsert(entity = PlaylistEntity::class)
     suspend fun upsertFromServer(playlists: List<PlaylistInfo>)
 
@@ -54,6 +65,19 @@ interface PlaylistDao {
 
     @Insert
     suspend fun insertSongs(songs: List<PlaylistSongCrossRef>)
+
+    @Query(
+        "SELECT COALESCE(MAX(position) + 1, 0) FROM PlaylistSongs WHERE playlistId = :playlistId"
+    )
+    suspend fun nextPosition(playlistId: Uuid): Int
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertSongIfMissing(song: PlaylistSongCrossRef)
+
+    @Transaction
+    suspend fun appendSong(playlistId: Uuid, songId: Uuid) {
+        insertSongIfMissing(PlaylistSongCrossRef(playlistId, songId, nextPosition(playlistId)))
+    }
 
     @Transaction
     suspend fun replaceSongs(playlistId: Uuid, songs: List<PlaylistSongCrossRef>) {

@@ -7,5 +7,6 @@ data class Playlist(
     val title: String,
     val coverUrl: String?,
     val isPrivate: Boolean,
-    val owner: UserSummary
+    val owner: UserSummary,
+    val isSaved: Boolean
 )

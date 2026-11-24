@@ -14,6 +14,7 @@ import com.nhajc.android.data.model.Playlist
 import com.nhajc.android.data.model.Release
 import com.nhajc.android.data.model.Song
 import com.nhajc.android.data.repository.LibraryRepository
+import com.nhajc.android.data.repository.PlaylistRepository
 import com.nhajc.android.data.repository.SettingsRepository
 import com.nhajc.android.data.repository.UserRepository
 import com.nhajc.android.playback.PlaybackController
@@ -36,6 +37,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val libraryRepository: LibraryRepository,
+    private val playlistRepository: PlaylistRepository,
     private val settingsRepository: SettingsRepository,
     private val playbackController: PlaybackController,
     userRepository: UserRepository
@@ -166,7 +168,7 @@ class LibraryViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                libraryRepository.createPlaylist(title)
+                playlistRepository.create(title)
                 state.update { it.copy(isNewPlaylistOpen = false) }
             } catch (exception: AppException) {
                 state.update { it.copy(newPlaylistError = exception.error) }

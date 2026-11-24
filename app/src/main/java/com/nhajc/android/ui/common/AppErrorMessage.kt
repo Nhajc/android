@@ -11,6 +11,7 @@ fun AppError.message(): Int = when (this) {
     AppError.INVALID_INPUT -> R.string.error_invalid_input
     AppError.INVALID_AVATAR -> R.string.error_invalid_avatar
     AppError.PLAYLIST_LIMIT -> R.string.error_playlist_limit
+    AppError.PLAYLIST_FULL -> R.string.error_playlist_full
     AppError.NOT_FOUND -> R.string.error_not_found
     AppError.SESSION_ENDED -> R.string.error_session_ended
     AppError.NETWORK -> R.string.error_network
