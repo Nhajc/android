@@ -14,14 +14,14 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -30,17 +30,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -50,10 +50,10 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.nhajc.android.R
 import com.nhajc.android.data.repository.SearchRepository
-import com.nhajc.android.ui.auth.LoginScreen
-import com.nhajc.android.ui.auth.RegisterScreen
 import com.nhajc.android.ui.admin.AdminRoute
 import com.nhajc.android.ui.artist.ArtistScreen
+import com.nhajc.android.ui.auth.LoginScreen
+import com.nhajc.android.ui.auth.RegisterScreen
 import com.nhajc.android.ui.downloads.DownloadsScreen
 import com.nhajc.android.ui.home.HomeScreen
 import com.nhajc.android.ui.library.LibraryScreen
@@ -102,8 +102,18 @@ private enum class TopLevelDestination(
 ) {
     HOME(HomeNavKey, R.string.home, Icons.Outlined.Home, Icons.Filled.Home),
     SEARCH(SearchNavKey, R.string.search, Icons.Outlined.Search, Icons.Filled.Search),
-    LIBRARY(LibraryNavKey, R.string.library, Icons.Outlined.LibraryMusic, Icons.Filled.LibraryMusic),
-    ADMIN(AdminNavKey, R.string.admin_title_home, Icons.Outlined.AdminPanelSettings, Icons.Filled.AdminPanelSettings)
+    LIBRARY(
+        LibraryNavKey,
+        R.string.library,
+        Icons.Outlined.LibraryMusic,
+        Icons.Filled.LibraryMusic
+    ),
+    ADMIN(
+        AdminNavKey,
+        R.string.admin_title_home,
+        Icons.Outlined.AdminPanelSettings,
+        Icons.Filled.AdminPanelSettings
+    )
 }
 
 @Composable
@@ -125,7 +135,10 @@ fun AuthNavigation() {
 }
 
 @Composable
-fun MainNavigation(searchRepository: SearchRepository, viewModel: MainNavigationViewModel = hiltViewModel()) {
+fun MainNavigation(
+    searchRepository: SearchRepository,
+    viewModel: MainNavigationViewModel = hiltViewModel()
+) {
     val isAdmin by viewModel.isAdmin.collectAsStateWithLifecycle()
     MainNavigationContent(searchRepository, isAdmin)
 }
@@ -134,7 +147,9 @@ fun MainNavigation(searchRepository: SearchRepository, viewModel: MainNavigation
 internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: Boolean) {
     val backStack = rememberNavBackStack(HomeNavKey)
     var adminBusy by remember { mutableStateOf(false) }
-    val destinations = TopLevelDestination.entries.filter { it != TopLevelDestination.ADMIN || isAdmin }
+    val destinations = TopLevelDestination.entries.filter { destination ->
+        destination != TopLevelDestination.ADMIN || isAdmin
+    }
     LaunchedEffect(isAdmin) {
         if (!isAdmin) {
             backStack.removeAll { it == AdminNavKey }
@@ -142,7 +157,8 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
         }
     }
 
-    val currentDestination = destinations.lastOrNull { it.navKey in backStack } ?: TopLevelDestination.HOME
+    val currentDestination =
+        destinations.lastOrNull { it.navKey in backStack } ?: TopLevelDestination.HOME
     val isPlayerOpen = backStack.last() == PlayerNavKey
     val isAdminOpen = backStack.last() == AdminNavKey
 
@@ -225,10 +241,12 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                 }
 
                 entry<AdminNavKey>(metadata = fadeThroughMetadata()) {
-                    if (isAdmin) AdminRoute(
-                        onExit = { backStack.removeLastOrNull() },
-                        onBusyChanged = { adminBusy = it }
-                    )
+                    if (isAdmin) {
+                        AdminRoute(
+                            onExit = { backStack.removeLastOrNull() },
+                            onBusyChanged = { adminBusy = it }
+                        )
+                    }
                 }
 
                 entry<PlayerNavKey> {
