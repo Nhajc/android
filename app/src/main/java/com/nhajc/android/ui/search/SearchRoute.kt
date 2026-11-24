@@ -18,6 +18,7 @@ import kotlin.uuid.Uuid
 fun SearchRoute(
     repository: SearchRepository,
     onOpenArtist: (Uuid) -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
     playbackViewModel: SearchPlaybackViewModel = hiltViewModel()
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -48,6 +49,7 @@ fun SearchRoute(
                 playbackViewModel.play(songs, index)
             }
         },
-        onArtistClick = { item -> onOpenArtist(Uuid.parse(item.id)) }
+        onArtistClick = { item -> onOpenArtist(Uuid.parse(item.id)) },
+        onReleaseClick = { item -> onOpenRelease(Uuid.parse(item.id)) }
     )
 }

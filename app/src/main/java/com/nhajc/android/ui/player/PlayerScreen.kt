@@ -2,6 +2,7 @@ package com.nhajc.android.ui.player
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +69,7 @@ import kotlinx.coroutines.launch
 fun PlayerScreen(
     onClose: () -> Unit,
     onOpenArtist: (Uuid) -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
     viewModel: PlayerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -86,7 +88,8 @@ fun PlayerScreen(
         onFavoriteClick = viewModel::onFavoriteClick,
         onErrorShown = viewModel::onErrorShown,
         onClose = onClose,
-        onOpenArtist = onOpenArtist
+        onOpenArtist = onOpenArtist,
+        onOpenRelease = onOpenRelease
     )
 }
 
@@ -101,6 +104,7 @@ internal fun PlayerScreen(
     onErrorShown: () -> Unit,
     onClose: () -> Unit,
     onOpenArtist: (Uuid) -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val mediaItemState = rememberCurrentMediaItemState(player)
@@ -153,8 +157,18 @@ internal fun PlayerScreen(
             )
         },
         topBar = {
-            TopAppBar(
-                title = {},
+            CenterAlignedTopAppBar(
+                title = {
+                    if (song != null) {
+                        Text(
+                            text = song.releaseTitle,
+                            modifier = Modifier.clickable { onOpenRelease(song.releaseId) },
+                            style = MaterialTheme.typography.titleSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(
