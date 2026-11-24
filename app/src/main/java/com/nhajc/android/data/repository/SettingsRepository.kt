@@ -5,6 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.nhajc.android.data.model.ArtistSort
@@ -14,6 +16,7 @@ import com.nhajc.android.data.model.LibrarySettings
 import com.nhajc.android.data.model.LibrarySort
 import com.nhajc.android.data.model.LibraryTab
 import com.nhajc.android.data.model.LibraryView
+import com.nhajc.android.data.model.QueuePosition
 import com.nhajc.android.data.model.ThemeMode
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +36,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     private val artistSortKey = stringPreferencesKey("artist_sort")
     private val favoriteSortKey = stringPreferencesKey("favorite_sort")
     private val downloadSortKey = stringPreferencesKey("download_sort")
+    private val queueIndexKey = intPreferencesKey("queue_index")
+    private val queuePositionKey = longPreferencesKey("queue_position")
 
     private val preferences: Flow<Preferences> = dataStore.data.catch { exception ->
         if (exception is IOException) {
@@ -70,6 +75,13 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         )
     }
 
+    val queuePosition: Flow<QueuePosition> = preferences.map { values ->
+        QueuePosition(
+            index = values[queueIndexKey] ?: 0,
+            positionMs = values[queuePositionKey] ?: 0
+        )
+    }
+
     suspend fun setAudioQuality(quality: AudioQuality) {
         dataStore.edit { values ->
             values[audioQualityKey] = quality.name
@@ -101,6 +113,13 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setFavoriteSort(sort: LibrarySort) = save(favoriteSortKey, sort)
 
     suspend fun setDownloadSort(sort: DownloadSort) = save(downloadSortKey, sort)
+
+    suspend fun setQueuePosition(position: QueuePosition) {
+        dataStore.edit { values ->
+            values[queueIndexKey] = position.index
+            values[queuePositionKey] = position.positionMs
+        }
+    }
 
     private suspend fun save(key: Preferences.Key<String>, value: Enum<*>) {
         dataStore.edit { values ->

@@ -2,6 +2,7 @@ package com.nhajc.android.data.database
 
 import androidx.room3.Dao
 import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Upsert
@@ -16,6 +17,12 @@ import kotlin.uuid.Uuid
 interface SongDao {
     @Upsert(entity = SongEntity::class)
     suspend fun upsertFromServer(songs: List<SongInfo>)
+
+    @Insert(entity = SongEntity::class, onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfMissing(songs: List<SongInfo>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertArtistsIfMissing(artists: List<SongArtistCrossRef>)
 
     @Query("UPDATE Songs SET favoritedAt = NULL")
     suspend fun clearFavoritedAt()

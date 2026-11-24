@@ -10,5 +10,6 @@ data class Song(
     val artists: List<ArtistSummary>,
     val releaseId: Uuid,
     val releaseTitle: String,
-    val coverUrl: String?
+    val coverUrl: String?,
+    val isFavorite: Boolean
 )

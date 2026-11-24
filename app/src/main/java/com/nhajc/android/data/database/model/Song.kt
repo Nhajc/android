@@ -109,6 +109,7 @@ fun SongWithArtists.asModel(): Song {
         artists = sortedArtists.map { it.asModel() },
         releaseId = song.info.releaseId,
         releaseTitle = song.info.releaseTitle,
-        coverUrl = song.info.coverUrl
+        coverUrl = song.info.coverUrl,
+        isFavorite = song.info.favoritedAt != null
     )
 }
