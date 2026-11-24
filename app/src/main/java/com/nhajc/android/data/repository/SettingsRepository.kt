@@ -7,7 +7,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.nhajc.android.data.model.ArtistSort
 import com.nhajc.android.data.model.AudioQuality
+import com.nhajc.android.data.model.DownloadSort
+import com.nhajc.android.data.model.LibrarySettings
+import com.nhajc.android.data.model.LibrarySort
+import com.nhajc.android.data.model.LibraryTab
+import com.nhajc.android.data.model.LibraryView
 import com.nhajc.android.data.model.ThemeMode
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +26,13 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     private val audioQualityKey = stringPreferencesKey("audio_quality")
     private val downloadQualityKey = stringPreferencesKey("download_quality")
     private val themeModeKey = stringPreferencesKey("theme_mode")
+    private val libraryTabKey = stringPreferencesKey("library_tab")
+    private val libraryViewKey = stringPreferencesKey("library_view")
+    private val releaseSortKey = stringPreferencesKey("release_sort")
+    private val playlistSortKey = stringPreferencesKey("playlist_sort")
+    private val artistSortKey = stringPreferencesKey("artist_sort")
+    private val favoriteSortKey = stringPreferencesKey("favorite_sort")
+    private val downloadSortKey = stringPreferencesKey("download_sort")
 
     private val preferences: Flow<Preferences> = dataStore.data.catch { exception ->
         if (exception is IOException) {
@@ -43,6 +56,20 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         ThemeMode.entries.firstOrNull { it.name == values[themeModeKey] } ?: ThemeMode.SYSTEM
     }
 
+    val librarySettings: Flow<LibrarySettings> = preferences.map { values ->
+        val defaults = LibrarySettings()
+
+        LibrarySettings(
+            tab = values.enumValue(libraryTabKey, defaults.tab),
+            view = values.enumValue(libraryViewKey, defaults.view),
+            releaseSort = values.enumValue(releaseSortKey, defaults.releaseSort),
+            playlistSort = values.enumValue(playlistSortKey, defaults.playlistSort),
+            artistSort = values.enumValue(artistSortKey, defaults.artistSort),
+            favoriteSort = values.enumValue(favoriteSortKey, defaults.favoriteSort),
+            downloadSort = values.enumValue(downloadSortKey, defaults.downloadSort)
+        )
+    }
+
     suspend fun setAudioQuality(quality: AudioQuality) {
         dataStore.edit { values ->
             values[audioQualityKey] = quality.name
@@ -60,4 +87,29 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
             values[themeModeKey] = mode.name
         }
     }
+
+    suspend fun setLibraryTab(tab: LibraryTab) = save(libraryTabKey, tab)
+
+    suspend fun setLibraryView(view: LibraryView) = save(libraryViewKey, view)
+
+    suspend fun setReleaseSort(sort: LibrarySort) = save(releaseSortKey, sort)
+
+    suspend fun setPlaylistSort(sort: LibrarySort) = save(playlistSortKey, sort)
+
+    suspend fun setArtistSort(sort: ArtistSort) = save(artistSortKey, sort)
+
+    suspend fun setFavoriteSort(sort: LibrarySort) = save(favoriteSortKey, sort)
+
+    suspend fun setDownloadSort(sort: DownloadSort) = save(downloadSortKey, sort)
+
+    private suspend fun save(key: Preferences.Key<String>, value: Enum<*>) {
+        dataStore.edit { values ->
+            values[key] = value.name
+        }
+    }
 }
+
+private inline fun <reified T : Enum<T>> Preferences.enumValue(
+    key: Preferences.Key<String>,
+    default: T
+): T = enumValues<T>().firstOrNull { it.name == this[key] } ?: default
