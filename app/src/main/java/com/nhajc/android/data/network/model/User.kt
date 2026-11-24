@@ -1,10 +1,12 @@
 package com.nhajc.android.data.network.model
 
+import com.nhajc.android.data.model.UserRole
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 import kotlinx.serialization.Serializable
 
-enum class UserRole { USER, ADMIN }
+@Serializable
+data object UpdateProfileRequest
 
 @Serializable
 data class UserResponse(

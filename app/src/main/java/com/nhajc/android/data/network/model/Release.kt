@@ -1,11 +1,11 @@
 package com.nhajc.android.data.network.model
 
+import com.nhajc.android.data.model.ReleaseType
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-enum class ReleaseType { ALBUM, SINGLE, EP, COMPILATION, UNKNOWN }
 
 @Serializable
 data class ReleaseRequest(
@@ -13,8 +13,7 @@ data class ReleaseRequest(
     val releaseType: ReleaseType,
     val releaseDate: LocalDate,
     val artistIds: List<Uuid>,
-    val genreIds: List<Uuid>,
-    val coverDataUri: String?
+    val genreIds: List<Uuid>
 )
 
 @Serializable
@@ -27,7 +26,7 @@ data class ReleaseSummaryResponse(
     val releaseDate: LocalDate,
     val songCount: Int,
     val artists: List<ArtistSummaryResponse>,
-    val isSaved: Boolean
+    val lastActivityAt: Instant?
 ) : SearchItemResponse,
     LibraryItemResponse
 
@@ -40,6 +39,6 @@ data class ReleaseResponse(
     val releaseDate: LocalDate,
     val songCount: Int,
     val artists: List<ArtistSummaryResponse>,
-    val isSaved: Boolean,
+    val lastActivityAt: Instant?,
     val songs: List<SongSummaryResponse>
 )

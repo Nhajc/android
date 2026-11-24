@@ -1,8 +1,8 @@
 package com.nhajc.android.data.network
 
+import com.nhajc.android.data.model.LibrarySort
 import com.nhajc.android.data.network.model.ArtistSummaryResponse
 import com.nhajc.android.data.network.model.LibraryItemResponse
-import com.nhajc.android.data.network.model.LibrarySort
 import com.nhajc.android.data.network.model.PageResponse
 import com.nhajc.android.data.network.model.PlaylistSummaryResponse
 import com.nhajc.android.data.network.model.ReleaseSummaryResponse

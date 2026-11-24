@@ -1,11 +1,12 @@
 package com.nhajc.android.data.network.model
 
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PlaylistRequest(val title: String, val isPrivate: Boolean)
+data class PlaylistRequest(val title: String, val isPrivate: Boolean, val songIds: List<Uuid>)
 
 @Serializable
 @SerialName("PLAYLIST")
@@ -16,7 +17,7 @@ data class PlaylistSummaryResponse(
     val isPrivate: Boolean,
     val owner: UserSummaryResponse,
     val songCount: Int,
-    val isSaved: Boolean
+    val lastActivityAt: Instant?
 ) : SearchItemResponse,
     LibraryItemResponse
 
@@ -28,6 +29,6 @@ data class PlaylistResponse(
     val isPrivate: Boolean,
     val owner: UserSummaryResponse,
     val songCount: Int,
-    val isSaved: Boolean,
+    val lastActivityAt: Instant?,
     val songs: List<SongResponse>
 )
