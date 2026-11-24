@@ -6,6 +6,8 @@ import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
+import androidx.room3.Junction
+import androidx.room3.Relation
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -60,6 +62,22 @@ enum class DownloadChoice { INHERIT, ALWAYS, NEVER }
     ]
 )
 data class SongArtistCrossRef(val songId: Uuid, val artistId: Uuid, val position: Int)
+
+data class SongWithArtists(
+    @Embedded val song: SongEntity,
+    @Relation(
+        parentColumns = ["id"],
+        entityColumns = ["id"],
+        associateBy = Junction(
+            SongArtistCrossRef::class,
+            parentColumns = ["songId"],
+            entityColumns = ["artistId"]
+        )
+    )
+    val artists: List<ArtistEntity>,
+    @Relation(parentColumns = ["id"], entityColumns = ["songId"])
+    val credits: List<SongArtistCrossRef>
+)
 
 @DatabaseView(
     viewName = "WantedSongs",

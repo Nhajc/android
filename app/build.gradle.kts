@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.room3.paging)
     implementation(libs.androidx.sqlite.bundled)
     ksp(libs.androidx.room3.compiler)
+    implementation(libs.commons.lang3)
 
     implementation(libs.androidx.datastore.preferences)
 

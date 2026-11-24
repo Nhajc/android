@@ -5,6 +5,7 @@ import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
+import androidx.room3.Relation
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -60,3 +61,9 @@ data class PlaylistEntity(
     ]
 )
 data class PlaylistSongCrossRef(val playlistId: Uuid, val songId: Uuid, val position: Int)
+
+data class PlaylistWithOwner(
+    @Embedded val playlist: PlaylistEntity,
+    @Relation(parentColumns = ["ownerId"], entityColumns = ["id"])
+    val owner: UserEntity
+)

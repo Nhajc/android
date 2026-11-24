@@ -4,6 +4,8 @@ import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
+import androidx.room3.Junction
+import androidx.room3.Relation
 import com.nhajc.android.data.model.ReleaseType
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -45,3 +47,19 @@ data class ReleaseEntity(@Embedded val info: ReleaseInfo, val downloadedAt: Inst
     ]
 )
 data class ReleaseArtistCrossRef(val releaseId: Uuid, val artistId: Uuid, val position: Int)
+
+data class ReleaseWithArtists(
+    @Embedded val release: ReleaseEntity,
+    @Relation(
+        parentColumns = ["id"],
+        entityColumns = ["id"],
+        associateBy = Junction(
+            ReleaseArtistCrossRef::class,
+            parentColumns = ["releaseId"],
+            entityColumns = ["artistId"]
+        )
+    )
+    val artists: List<ArtistEntity>,
+    @Relation(parentColumns = ["id"], entityColumns = ["releaseId"])
+    val credits: List<ReleaseArtistCrossRef>
+)

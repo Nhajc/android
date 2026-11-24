@@ -1,8 +1,10 @@
 package com.nhajc.android.data.database
 
 import androidx.room3.ColumnTypeConverters
+import androidx.room3.DaoReturnTypeConverters
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
+import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import com.nhajc.android.data.database.model.ArtistEntity
 import com.nhajc.android.data.database.model.PlaylistEntity
 import com.nhajc.android.data.database.model.PlaylistSongCrossRef
@@ -30,6 +32,7 @@ import com.nhajc.android.data.database.model.WantedSongView
     version = 1
 )
 @ColumnTypeConverters(Converters::class)
+@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
 

@@ -8,11 +8,29 @@ import androidx.room3.Upsert
 import com.nhajc.android.data.database.model.PlaylistEntity
 import com.nhajc.android.data.database.model.PlaylistInfo
 import com.nhajc.android.data.database.model.PlaylistSongCrossRef
+import com.nhajc.android.data.database.model.PlaylistWithOwner
+import com.nhajc.android.data.database.model.SongWithArtists
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlaylistDao {
+    @Transaction
+    @Query("SELECT * FROM Playlists WHERE id = :id")
+    fun observe(id: Uuid): Flow<PlaylistWithOwner?>
+
+    @Transaction
+    @Query(
+        """
+        SELECT s.* FROM Songs s
+        JOIN PlaylistSongs ps ON ps.songId = s.id
+        WHERE ps.playlistId = :id
+        ORDER BY ps.position
+        """
+    )
+    fun observeSongs(id: Uuid): Flow<List<SongWithArtists>>
+
     @Upsert(entity = PlaylistEntity::class)
     suspend fun upsertFromServer(playlists: List<PlaylistInfo>)
 
