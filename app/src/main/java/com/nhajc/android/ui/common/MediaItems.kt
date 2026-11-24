@@ -133,7 +133,8 @@ fun <T : Any> PagedMediaItems(
     view: LibraryView,
     emptyText: String,
     key: (T) -> String,
-    entry: @Composable (T) -> MediaEntry
+    entry: @Composable (T) -> MediaEntry,
+    onItemClick: (index: Int) -> Unit = {}
 ) {
     val isEmpty = items.itemCount == 0 && items.loadState.refresh is LoadState.NotLoading
 
@@ -167,7 +168,7 @@ fun <T : Any> PagedMediaItems(
                         subtitle = current.subtitle,
                         imageUrl = current.imageUrl,
                         fallbackIcon = current.fallbackIcon,
-                        onClick = {},
+                        onClick = { onItemClick(index) },
                         isRound = current.isRound
                     )
                 }
@@ -196,7 +197,7 @@ fun <T : Any> PagedMediaItems(
                     imageUrl = current.imageUrl,
                     fallbackIcon = current.fallbackIcon,
                     showText = view == LibraryView.GRID,
-                    onClick = {},
+                    onClick = { onItemClick(index) },
                     isRound = current.isRound
                 )
             }

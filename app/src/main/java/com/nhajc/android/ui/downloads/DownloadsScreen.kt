@@ -49,6 +49,7 @@ fun DownloadsScreen(onBack: () -> Unit, viewModel: DownloadsViewModel = hiltView
         songs = songs,
         onSortChange = viewModel::onSortChange,
         onViewChange = viewModel::onViewChange,
+        onSongClick = viewModel::onSongClick,
         onSearchOpen = viewModel::onSearchOpen,
         onSearchClose = viewModel::onSearchClose,
         onQueryChange = viewModel::onQueryChange,
@@ -62,6 +63,7 @@ internal fun DownloadsScreen(
     songs: LazyPagingItems<Song>,
     onSortChange: (DownloadSort) -> Unit,
     onViewChange: () -> Unit,
+    onSongClick: (index: Int) -> Unit,
     onSearchOpen: () -> Unit,
     onSearchClose: () -> Unit,
     onQueryChange: (String) -> Unit,
@@ -131,7 +133,8 @@ internal fun DownloadsScreen(
                         imageUrl = song.coverUrl,
                         fallbackIcon = Icons.Outlined.MusicNote
                     )
-                }
+                },
+                onItemClick = onSongClick
             )
         }
     }
@@ -154,6 +157,7 @@ private fun DownloadsScreenPreview() {
             songs = flowOf(PagingData.empty<Song>()).collectAsLazyPagingItems(),
             onSortChange = {},
             onViewChange = {},
+            onSongClick = {},
             onSearchOpen = {},
             onSearchClose = {},
             onQueryChange = {},

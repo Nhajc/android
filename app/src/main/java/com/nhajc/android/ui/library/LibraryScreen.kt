@@ -94,6 +94,7 @@ fun LibraryScreen(
         onNewPlaylistOpen = viewModel::onNewPlaylistOpen,
         onNewPlaylistDismiss = viewModel::onNewPlaylistDismiss,
         onCreatePlaylist = viewModel::onCreatePlaylist,
+        onFavoriteClick = viewModel::onFavoriteClick,
         onOpenSettings = onOpenSettings,
         onOpenDownloads = onOpenDownloads
     )
@@ -119,6 +120,7 @@ internal fun LibraryScreen(
     onNewPlaylistOpen: () -> Unit,
     onNewPlaylistDismiss: () -> Unit,
     onCreatePlaylist: (String) -> Unit,
+    onFavoriteClick: (index: Int) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenDownloads: () -> Unit,
     modifier: Modifier = Modifier
@@ -195,7 +197,8 @@ internal fun LibraryScreen(
                     releases = releases,
                     playlists = playlists,
                     artists = artists,
-                    favorites = favorites
+                    favorites = favorites,
+                    onFavoriteClick = onFavoriteClick
                 )
             }
         }
@@ -277,7 +280,8 @@ private fun LibraryContent(
     releases: LazyPagingItems<Release>,
     playlists: LazyPagingItems<Playlist>,
     artists: LazyPagingItems<ArtistSummary>,
-    favorites: LazyPagingItems<Song>
+    favorites: LazyPagingItems<Song>,
+    onFavoriteClick: (index: Int) -> Unit
 ) {
     val view = uiState.settings.view
     val isFiltered = uiState.query.isNotBlank()
@@ -288,7 +292,9 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_releases),
             key = { it.id.toString() },
-            entry = { release -> release.entry() }
+            entry = { release -> release.entry() },
+            // TODO: open the release screen once it exists
+            onItemClick = {}
         )
 
         LibraryTab.PLAYLISTS -> PagedMediaItems(
@@ -296,7 +302,9 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_playlists),
             key = { it.id.toString() },
-            entry = { playlist -> playlist.entry() }
+            entry = { playlist -> playlist.entry() },
+            // TODO: open the playlist screen once it exists
+            onItemClick = {}
         )
 
         LibraryTab.ARTISTS -> PagedMediaItems(
@@ -304,7 +312,9 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_artists),
             key = { it.id.toString() },
-            entry = { artist -> artist.entry() }
+            entry = { artist -> artist.entry() },
+            // TODO: open the artist screen once it exists
+            onItemClick = {}
         )
 
         LibraryTab.FAVORITES -> PagedMediaItems(
@@ -312,7 +322,8 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_favorites),
             key = { it.id.toString() },
-            entry = { song -> song.entry() }
+            entry = { song -> song.entry() },
+            onItemClick = onFavoriteClick
         )
     }
 }
@@ -420,6 +431,7 @@ private fun LibraryScreenPreview() {
             onNewPlaylistOpen = {},
             onNewPlaylistDismiss = {},
             onCreatePlaylist = {},
+            onFavoriteClick = {},
             onOpenSettings = {},
             onOpenDownloads = {}
         )

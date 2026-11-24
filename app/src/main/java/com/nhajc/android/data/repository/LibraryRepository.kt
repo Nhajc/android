@@ -80,6 +80,12 @@ class LibraryRepository @Inject constructor(
         pager { libraryDao.downloads(searchKey(query), sort) }
             .map { page -> page.map { it.asModel() } }
 
+    suspend fun favoriteList(query: String, sort: LibrarySort): List<Song> =
+        libraryDao.songList(searchKey(query), sort).map { it.asModel() }
+
+    suspend fun downloadList(query: String, sort: DownloadSort): List<Song> =
+        libraryDao.downloadList(searchKey(query), sort).map { it.asModel() }
+
     suspend fun createPlaylist(title: String) {
         val request = PlaylistRequest(title = title, isPrivate = false, songIds = emptyList())
         val playlist = call { playlistApi.createPlaylist(request, null) }

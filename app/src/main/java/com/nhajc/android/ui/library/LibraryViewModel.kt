@@ -16,6 +16,7 @@ import com.nhajc.android.data.model.Song
 import com.nhajc.android.data.repository.LibraryRepository
 import com.nhajc.android.data.repository.SettingsRepository
 import com.nhajc.android.data.repository.UserRepository
+import com.nhajc.android.playback.PlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,6 +37,7 @@ import kotlinx.coroutines.launch
 class LibraryViewModel @Inject constructor(
     private val libraryRepository: LibraryRepository,
     private val settingsRepository: SettingsRepository,
+    private val playbackController: PlaybackController,
     userRepository: UserRepository
 ) : ViewModel() {
     private val state = MutableStateFlow(LibraryUiState())
@@ -71,6 +73,16 @@ class LibraryViewModel @Inject constructor(
         combine(query, settings.map { it.favoriteSort }.distinctUntilChanged(), ::Pair)
             .flatMapLatest { (query, sort) -> libraryRepository.songs(query, sort) }
             .cachedIn(viewModelScope)
+
+    fun onFavoriteClick(index: Int) {
+        val current = uiState.value
+
+        viewModelScope.launch {
+            val songs = libraryRepository.favoriteList(current.query, current.settings.favoriteSort)
+
+            playbackController.play(songs, index)
+        }
+    }
 
     fun onTabSelect(tab: LibraryTab) {
         viewModelScope.launch { settingsRepository.setLibraryTab(tab) }
