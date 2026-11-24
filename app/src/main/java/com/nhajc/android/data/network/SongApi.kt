@@ -1,6 +1,7 @@
 package com.nhajc.android.data.network
 
 import com.nhajc.android.data.network.model.IdResponse
+import com.nhajc.android.data.network.model.UploadSongRequest
 import kotlin.uuid.Uuid
 import okhttp3.MultipartBody
 import retrofit2.http.Multipart
@@ -13,8 +14,7 @@ interface SongApi {
     @POST("admin/releases/{id}/songs")
     suspend fun uploadSong(
         @Path("id") releaseId: Uuid,
-        @Part trackNumber: MultipartBody.Part,
-        @Part title: MultipartBody.Part,
-        @Part file: MultipartBody.Part
+        @Part("data") request: UploadSongRequest,
+        @Part audio: MultipartBody.Part
     ): IdResponse
 }

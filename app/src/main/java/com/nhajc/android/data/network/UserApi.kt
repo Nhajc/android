@@ -1,5 +1,6 @@
 package com.nhajc.android.data.network
 
+import com.nhajc.android.data.network.model.UpdateProfileRequest
 import com.nhajc.android.data.network.model.UserResponse
 import okhttp3.MultipartBody
 import retrofit2.http.GET
@@ -14,7 +15,7 @@ interface UserApi {
     @Multipart
     @PUT("users/me")
     suspend fun updateMe(
-        @Part avatar: MultipartBody.Part?,
-        @Part charset: MultipartBody.Part
+        @Part("data") request: UpdateProfileRequest,
+        @Part avatar: MultipartBody.Part?
     ): UserResponse
 }
