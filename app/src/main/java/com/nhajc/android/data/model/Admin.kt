@@ -25,7 +25,7 @@ data class ArtistDraft(val name: String = "", val image: AdminFile? = null)
 data class ReleaseDraft(val title: String = "", val type: ReleaseType = ReleaseType.ALBUM,
     val date: String = "", val artists: List<AdminArtist> = emptyList(),
     val genreIds: Set<Uuid> = emptySet(), val image: AdminFile? = null)
-data class SongDraft(val title: String = "", val trackNumber: String = "", val audio: AdminFile? = null, val autoTrack: Boolean = true)
+data class SongDraft(val title: String = "", val trackNumber: String = "", val audio: AdminFile? = null)
 data class AdminUiState(
     val checkingAccess: Boolean = true, val isAdmin: Boolean = false, val page: AdminPage = AdminPage.HOME,
     val query: String = "", val artists: List<AdminArtist> = emptyList(), val releases: List<AdminRelease> = emptyList(),
@@ -35,7 +35,7 @@ data class AdminUiState(
     val pickerPage: Int = 0, val morePickerArtists: Boolean = false, val loadingPicker: Boolean = false,
     val artist: AdminArtistDetail? = null, val release: AdminReleaseDetail? = null,
     val artistDraft: ArtistDraft = ArtistDraft(), val genreName: String = "",
-    val releaseDraft: ReleaseDraft = ReleaseDraft(), val songDraft: SongDraft = SongDraft(),
+    val releaseDraft: ReleaseDraft = ReleaseDraft(),
     val busy: Boolean = false, val uploadProgress: Float? = null, val processingAudio: Boolean = false,
     val error: AdminError? = null, val saved: Boolean = false,
     val uploadQueue: List<UploadQueueItem> = emptyList(), val queueRunning: Boolean = false,
@@ -66,11 +66,9 @@ object AdminValidation {
 
     fun song(draft: SongDraft, takenTracks: Set<Int>): AdminError? {
         name(draft.title)?.let { return it }
-        if (!draft.autoTrack) {
-            val track = draft.trackNumber.trim().toIntOrNull() ?: return AdminError.INVALID_TRACK
-            if (track < 1) return AdminError.INVALID_TRACK
-            if (track in takenTracks) return AdminError.TRACK_EXISTS
-        }
+        val track = draft.trackNumber.trim().toIntOrNull() ?: return AdminError.INVALID_TRACK
+        if (track < 1) return AdminError.INVALID_TRACK
+        if (track in takenTracks) return AdminError.TRACK_EXISTS
         if (draft.audio == null) return AdminError.INVALID_AUDIO
         return null
     }

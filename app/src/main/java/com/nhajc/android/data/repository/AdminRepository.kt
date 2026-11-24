@@ -85,7 +85,7 @@ class AdminRepository @Inject constructor(
     suspend fun uploadSong(id: Uuid, draft: SongDraft, onProgress: (Float?) -> Unit, onProcessing: () -> Unit): Unit =
         adminCall(AdminError.TRACK_EXISTS) {
             AdminValidation.song(draft, emptySet())?.let { throw AdminException(it) }
-            songs.uploadSong(id, UploadSongRequest(if (draft.autoTrack) null else draft.trackNumber.trim().toInt(), draft.title.trim()),
+            songs.uploadSong(id, UploadSongRequest(draft.trackNumber.trim().toInt(), draft.title.trim()),
                 requireNotNull(draft.audio).part(AUDIO_LIMIT, onProgress, onProcessing))
             Unit
         }

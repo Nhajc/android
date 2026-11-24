@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UploadSongRequest(val trackNumber: Int?, val title: String)
+data class UploadSongRequest(val trackNumber: Int, val title: String)
 
 @Serializable
 data class ReorderSongsRequest(val songIds: List<Uuid>)

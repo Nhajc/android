@@ -20,13 +20,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class AdminField { ARTIST_NAME, GENRE_NAME, RELEASE_TITLE, RELEASE_DATE, SONG_TITLE, TRACK_NUMBER }
+enum class AdminField { ARTIST_NAME, GENRE_NAME, RELEASE_TITLE, RELEASE_DATE }
 sealed interface AdminEvent {
     data class Navigate(val page: AdminPage) : AdminEvent
     data class Query(val value: String, val picker: Boolean = false) : AdminEvent
     data class Field(val field: AdminField, val value: String) : AdminEvent
     data class Type(val value: ReleaseType) : AdminEvent
-    data class AutomaticTrack(val enabled: Boolean) : AdminEvent
     data class ToggleGenre(val id: Uuid) : AdminEvent
     data class AddArtist(val artist: AdminArtist) : AdminEvent
     data class RemoveArtist(val id: Uuid) : AdminEvent
@@ -130,12 +129,9 @@ class AdminViewModel @Inject constructor(private val repository: AdminRepository
                     AdminField.GENRE_NAME -> s.copy(genreName = event.value, error = null)
                     AdminField.RELEASE_TITLE -> s.copy(releaseDraft = s.releaseDraft.copy(title = event.value), error = null)
                     AdminField.RELEASE_DATE -> s.copy(releaseDraft = s.releaseDraft.copy(date = event.value), error = null)
-                    AdminField.SONG_TITLE -> s.copy(songDraft = s.songDraft.copy(title = event.value), error = null)
-                    AdminField.TRACK_NUMBER -> s.copy(songDraft = s.songDraft.copy(trackNumber = event.value), error = null)
                 }
             }
             is AdminEvent.Type -> mutableState.update { it.copy(releaseDraft = it.releaseDraft.copy(type = event.value), error = null) }
-            is AdminEvent.AutomaticTrack -> mutableState.update { it.copy(songDraft = it.songDraft.copy(autoTrack = event.enabled), error = null) }
             is AdminEvent.ToggleGenre -> mutableState.update {
                 val selected = it.releaseDraft.genreIds
                 val ids = if (event.id in selected) selected - event.id else selected + event.id
@@ -175,8 +171,7 @@ class AdminViewModel @Inject constructor(private val repository: AdminRepository
                 }
             }
             AdminEvent.RemoveFile -> mutableState.update {
-                it.copy(artistDraft = it.artistDraft.copy(image = null), releaseDraft = it.releaseDraft.copy(image = null),
-                    songDraft = it.songDraft.copy(audio = null), error = null)
+                it.copy(artistDraft = it.artistDraft.copy(image = null), releaseDraft = it.releaseDraft.copy(image = null), error = null)
             }
             AdminEvent.Submit -> submit()
             AdminEvent.More -> search(state.value.query, false, state.value.listPage + 1)
