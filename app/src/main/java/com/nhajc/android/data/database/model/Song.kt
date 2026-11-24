@@ -1,0 +1,79 @@
+package com.nhajc.android.data.database.model
+
+import androidx.room3.ColumnInfo
+import androidx.room3.DatabaseView
+import androidx.room3.Embedded
+import androidx.room3.Entity
+import androidx.room3.ForeignKey
+import androidx.room3.Index
+import kotlin.time.Instant
+import kotlin.uuid.Uuid
+
+data class SongInfo(
+    val id: Uuid,
+    val releaseId: Uuid,
+    val releaseTitle: String,
+    val coverUrl: String?,
+    val title: String,
+    val searchTitle: String,
+    val trackNumber: Int,
+    val durationSeconds: Int,
+    val favoritedAt: Instant?
+)
+
+@Entity(
+    tableName = "Songs",
+    primaryKeys = ["id"],
+    indices = [Index(value = ["releaseId"])]
+)
+data class SongEntity(
+    @Embedded val info: SongInfo,
+    @ColumnInfo(
+        defaultValue = "INHERIT"
+    ) val downloadChoice: DownloadChoice = DownloadChoice.INHERIT,
+    val fileQuality: String? = null,
+    val downloadedAt: Instant? = null
+)
+
+enum class DownloadChoice { INHERIT, ALWAYS, NEVER }
+
+@Entity(
+    tableName = "SongArtists",
+    primaryKeys = ["songId", "artistId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = SongEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["songId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = ArtistEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["artistId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index(value = ["songId", "position"], unique = true),
+        Index(value = ["artistId"])
+    ]
+)
+data class SongArtistCrossRef(val songId: Uuid, val artistId: Uuid, val position: Int)
+
+@DatabaseView(
+    viewName = "WantedSongs",
+    value = """
+        SELECT id FROM Songs WHERE downloadChoice = 'ALWAYS'
+        UNION
+        SELECT s.id FROM Songs s
+        JOIN Releases r ON r.id = s.releaseId
+        WHERE r.downloadedAt IS NOT NULL AND s.downloadChoice != 'NEVER'
+        UNION
+        SELECT s.id FROM Songs s
+        JOIN PlaylistSongs ps ON ps.songId = s.id
+        JOIN Playlists p ON p.id = ps.playlistId
+        WHERE p.downloadedAt IS NOT NULL AND s.downloadChoice != 'NEVER'
+    """
+)
+data class WantedSongView(val id: Uuid)
