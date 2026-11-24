@@ -16,21 +16,30 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -42,6 +51,7 @@ import com.nhajc.android.R
 import com.nhajc.android.data.repository.SearchRepository
 import com.nhajc.android.ui.auth.LoginScreen
 import com.nhajc.android.ui.auth.RegisterScreen
+import com.nhajc.android.ui.admin.AdminRoute
 import com.nhajc.android.ui.home.HomeScreen
 import com.nhajc.android.ui.search.SearchRoute
 import com.nhajc.android.ui.settings.SettingsScreen
@@ -65,6 +75,9 @@ data object LibraryNavKey : NavKey
 @Serializable
 data object SettingsNavKey : NavKey
 
+@Serializable
+data object AdminNavKey : NavKey
+
 private enum class TopLevelDestination(
     val navKey: NavKey,
     @StringRes val label: Int,
@@ -73,7 +86,8 @@ private enum class TopLevelDestination(
 ) {
     HOME(HomeNavKey, R.string.home, Icons.Outlined.Home, Icons.Filled.Home),
     SEARCH(SearchNavKey, R.string.search, Icons.Outlined.Search, Icons.Filled.Search),
-    LIBRARY(LibraryNavKey, R.string.library, Icons.Outlined.LibraryMusic, Icons.Filled.LibraryMusic)
+    LIBRARY(LibraryNavKey, R.string.library, Icons.Outlined.LibraryMusic, Icons.Filled.LibraryMusic),
+    ADMIN(AdminNavKey, R.string.admin_title_home, Icons.Outlined.AdminPanelSettings, Icons.Filled.AdminPanelSettings)
 }
 
 @Composable
@@ -95,21 +109,37 @@ fun AuthNavigation() {
 }
 
 @Composable
-fun MainNavigation(searchRepository: SearchRepository) {
-    val backStack = rememberNavBackStack(HomeNavKey)
+fun MainNavigation(searchRepository: SearchRepository, viewModel: MainNavigationViewModel = hiltViewModel()) {
+    val isAdmin by viewModel.isAdmin.collectAsStateWithLifecycle()
+    MainNavigationContent(searchRepository, isAdmin)
+}
 
-    val currentDestination = TopLevelDestination.entries.last { it.navKey in backStack }
+@Composable
+internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: Boolean) {
+    val backStack = rememberNavBackStack(HomeNavKey)
+    var adminBusy by remember { mutableStateOf(false) }
+    val destinations = TopLevelDestination.entries.filter { it != TopLevelDestination.ADMIN || isAdmin }
+    LaunchedEffect(isAdmin) {
+        if (!isAdmin) {
+            backStack.removeAll { it == AdminNavKey }
+            adminBusy = false
+        }
+    }
+
+    val currentDestination = destinations.lastOrNull { it.navKey in backStack } ?: TopLevelDestination.HOME
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         bottomBar = {
             NavigationBar {
-                TopLevelDestination.entries.forEach { destination ->
+                destinations.forEach { destination ->
                     val selected = destination == currentDestination
 
                     NavigationBarItem(
                         selected = selected,
+                        enabled = !adminBusy,
                         onClick = {
+                            if (adminBusy || backStack.lastOrNull() == destination.navKey) return@NavigationBarItem
                             backStack.retainAll { it == HomeNavKey }
 
                             if (destination != TopLevelDestination.HOME) {
@@ -135,7 +165,9 @@ fun MainNavigation(searchRepository: SearchRepository) {
                 .consumeWindowInsets(innerPadding),
             entryProvider = entryProvider {
                 entry<HomeNavKey> {
-                    HomeScreen(onOpenSettings = { backStack.add(SettingsNavKey) })
+                    HomeScreen(
+                        onOpenSettings = { backStack.add(SettingsNavKey) }
+                    )
                 }
 
                 entry<SearchNavKey>(metadata = fadeThroughMetadata()) {
@@ -146,6 +178,13 @@ fun MainNavigation(searchRepository: SearchRepository) {
 
                 entry<SettingsNavKey> {
                     SettingsScreen(onBack = { backStack.removeLastOrNull() })
+                }
+
+                entry<AdminNavKey>(metadata = fadeThroughMetadata()) {
+                    if (isAdmin) AdminRoute(
+                        onExit = { backStack.removeLastOrNull() },
+                        onBusyChanged = { adminBusy = it }
+                    )
                 }
             }
         )

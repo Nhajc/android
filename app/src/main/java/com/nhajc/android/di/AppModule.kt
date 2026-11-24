@@ -10,6 +10,9 @@ import com.nhajc.android.data.datastore.sessionDataStore
 import com.nhajc.android.data.network.ArtistApi
 import com.nhajc.android.data.network.AuthApi
 import com.nhajc.android.data.network.LibraryApi
+import com.nhajc.android.data.network.GenreApi
+import com.nhajc.android.data.network.ReleaseApi
+import com.nhajc.android.data.network.SongApi
 import com.nhajc.android.data.network.TokenAuthenticator
 import com.nhajc.android.data.network.TokenInterceptor
 import com.nhajc.android.data.network.UserApi
@@ -26,6 +29,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Named
 import javax.inject.Singleton
+import java.util.concurrent.TimeUnit
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -65,10 +69,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun artistApi(retrofit: Retrofit): ArtistApi = retrofit.create()
-
-    @Provides
-    @Singleton
     fun libraryApi(retrofit: Retrofit): LibraryApi = retrofit.create()
 
     @Provides
@@ -78,6 +78,27 @@ object AppModule {
     @Provides
     @Singleton
     fun searchRepository(api: SearchApi): SearchRepository = ApiSearchRepository(api)
+
+    @Provides
+    @Singleton
+    @Named("admin")
+    fun adminRetrofit(client: OkHttpClient): Retrofit = retrofit(
+        client.newBuilder()
+            .readTimeout(10, TimeUnit.MINUTES)
+            .writeTimeout(10, TimeUnit.MINUTES)
+            .callTimeout(15, TimeUnit.MINUTES)
+            .retryOnConnectionFailure(false)
+            .build()
+    )
+
+    @Provides
+    fun artistApi(@Named("admin") retrofit: Retrofit): ArtistApi = retrofit.create()
+    @Provides
+    fun genreApi(@Named("admin") retrofit: Retrofit): GenreApi = retrofit.create()
+    @Provides
+    fun releaseApi(@Named("admin") retrofit: Retrofit): ReleaseApi = retrofit.create()
+    @Provides
+    fun songApi(@Named("admin") retrofit: Retrofit): SongApi = retrofit.create()
 
     @Provides
     @Singleton
