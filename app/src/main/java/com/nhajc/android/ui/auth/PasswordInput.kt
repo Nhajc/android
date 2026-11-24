@@ -64,7 +64,7 @@ internal fun PasswordInput(
     enabled: Boolean,
     onSubmit: () -> Unit,
     isError: Boolean = false,
-    supportingText: String? = null
+    supportingText: String = ""
 ) {
     var isVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -107,11 +107,7 @@ internal fun PasswordInput(
         },
         visualTransformation = transformation,
         isError = isError,
-        supportingText = if (supportingText == null) {
-            null
-        } else {
-            { Text(supportingText) }
-        },
+        supportingText = { Text(supportingText) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done,

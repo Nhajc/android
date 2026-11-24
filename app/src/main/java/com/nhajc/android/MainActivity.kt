@@ -8,8 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.data.model.ThemeMode
@@ -67,12 +70,14 @@ fun NhajcApp(uiState: MainActivityUiState) {
     }
 
     NhajcTheme(darkTheme = darkTheme) {
-        if (uiState.isLoggedIn) {
-            val application = LocalContext.current.applicationContext as NhajcApplication
+        Surface(modifier = Modifier.fillMaxSize()) {
+            if (uiState.isLoggedIn) {
+                val application = LocalContext.current.applicationContext as NhajcApplication
 
-            MainNavigation(application.searchSession)
-        } else {
-            AuthNavigation()
+                MainNavigation(application.searchSession)
+            } else {
+                AuthNavigation()
+            }
         }
     }
 }

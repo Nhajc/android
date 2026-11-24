@@ -75,8 +75,7 @@ internal fun RegisterScreen(
 
     AuthContainer(
         title = stringResource(R.string.register_title),
-        modifier = modifier,
-        onBack = onLogin
+        modifier = modifier
     ) {
         OutlinedTextField(
             value = uiState.username,
@@ -109,10 +108,12 @@ internal fun RegisterScreen(
                 Icon(Icons.Outlined.Email, contentDescription = null)
             },
             isError = uiState.email.isNotBlank() && !isEmailValid,
-            supportingText = if (uiState.email.isNotBlank() && !isEmailValid) {
-                { Text(stringResource(R.string.invalid_email)) }
-            } else {
-                null
+            supportingText = {
+                if (uiState.email.isNotBlank() && !isEmailValid) {
+                    Text(stringResource(R.string.invalid_email))
+                } else {
+                    Text("")
+                }
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,

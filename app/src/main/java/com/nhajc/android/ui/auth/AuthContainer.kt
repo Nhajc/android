@@ -61,7 +61,6 @@ import com.nhajc.android.ui.theme.NhajcTheme
 internal fun AuthContainer(
     title: String,
     modifier: Modifier = Modifier,
-    onBack: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
@@ -80,15 +79,6 @@ internal fun AuthContainer(
                     .padding(horizontal = 24.dp, vertical = 28.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                if (onBack != null) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                }
-
                 Text(
                     text = title,
                     modifier = Modifier.fillMaxWidth(),

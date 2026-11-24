@@ -100,6 +100,7 @@ internal fun LoginScreen(
             leadingIcon = {
                 Icon(Icons.Outlined.Person, contentDescription = null)
             },
+            supportingText = { Text("") },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next,
                 autoCorrectEnabled = false

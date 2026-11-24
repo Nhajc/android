@@ -1,7 +1,18 @@
 package com.nhajc.android.ui.navigation
 
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -30,13 +41,8 @@ data object SettingsNavKey : NavKey
 fun AuthNavigation() {
     val backStack = rememberNavBackStack(LoginNavKey)
 
-    NavDisplay(
+    AppNavDisplay(
         backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
         entryProvider = entryProvider {
             entry<LoginNavKey> {
                 LoginScreen(onRegister = { backStack.add(RegisterNavKey) })
@@ -53,13 +59,8 @@ fun AuthNavigation() {
 fun MainNavigation(searchSession: SearchSession) {
     val backStack = rememberNavBackStack(SearchNavKey)
 
-    NavDisplay(
+    AppNavDisplay(
         backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
         entryProvider = entryProvider {
             entry<SearchNavKey> {
                 SearchRoute(searchSession)
@@ -70,4 +71,38 @@ fun MainNavigation(searchSession: SearchSession) {
             }
         }
     )
+}
+
+private const val TRANSITION_MILLIS = 300
+private const val FADE_OUT_MILLIS = 105
+
+@Composable
+private fun AppNavDisplay(
+    backStack: NavBackStack<NavKey>,
+    entryProvider: (NavKey) -> NavEntry<NavKey>
+) {
+    val slideDistance = with(LocalDensity.current) { 30.dp.roundToPx() }
+
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        transitionSpec = { sharedAxisX(slideDistance) },
+        popTransitionSpec = { sharedAxisX(-slideDistance) },
+        predictivePopTransitionSpec = { sharedAxisX(-slideDistance) },
+        entryProvider = entryProvider
+    )
+}
+
+private fun sharedAxisX(slideDistance: Int): ContentTransform {
+    val enter = slideInHorizontally(tween(TRANSITION_MILLIS)) { slideDistance } +
+        fadeIn(tween(TRANSITION_MILLIS - FADE_OUT_MILLIS, delayMillis = FADE_OUT_MILLIS))
+
+    val exit = slideOutHorizontally(tween(TRANSITION_MILLIS)) { -slideDistance } +
+        fadeOut(tween(FADE_OUT_MILLIS))
+
+    return enter togetherWith exit
 }
