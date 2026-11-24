@@ -50,4 +50,31 @@
     <string name="error_session_ended">Your session has ended. Log in again.</string>
     <string name="error_network">Can\'t reach Nhajc. Try again.</string>
     <string name="error_server">Nhajc is having problems. Try again later.</string>
+    <string name="search_title">Search</string>
+    <string name="search_placeholder">Releases, playlists, artists, songs</string>
+    <string name="search_clear">Clear search</string>
+    <string name="search_loading">Searching…</string>
+    <string name="search_results_title">Results for “%1$s”</string>
+    <string name="search_failed">Unable to search</string>
+    <string name="search_empty_title">No results</string>
+    <string name="search_empty_description">Try another name or change your filters.</string>
+    <string name="search_load_more">Load more results</string>
+    <string name="search_welcome_title">What would you like to hear?</string>
+    <string name="search_welcome_description">Find a favorite release, playlist, artist, or song.</string>
+    <string name="search_retry">Try again</string>
+    <string name="search_songs">Songs</string>
+    <string name="search_releases">Releases</string>
+    <string name="search_playlists">Playlists</string>
+    <string name="search_artists">Artists</string>
+    <string name="search_invalid_query">Enter between 1 and 100 characters.</string>
+    <string name="search_invalid_response">The server returned an unsupported response.</string>
+    <string name="search_unknown_error">Something went wrong. Try again.</string>
+    <plurals name="search_results_loaded">
+        <item quantity="one">%d result loaded</item>
+        <item quantity="other">%d results loaded</item>
+    </plurals>
+    <plurals name="search_song_count">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
 </resources>

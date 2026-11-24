@@ -3,8 +3,8 @@ package com.nhajc.android.ui.search
 import com.nhajc.android.data.model.SearchCategory
 import com.nhajc.android.data.model.SearchError
 import com.nhajc.android.data.model.SearchViewModel
+import com.nhajc.android.data.repository.SearchRepository
 import com.nhajc.android.data.repository.SearchRepositoryException
-import com.nhajc.android.data.repository.SearchSession
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -17,18 +17,17 @@ import kotlinx.coroutines.launch
 
 // A plain state holder, not an AndroidX ViewModel. The view-model itself is a data class.
 class SearchController(
-    private val session: SearchSession,
+    private val repository: SearchRepository,
     private val scope: CoroutineScope,
     query: String = "",
-    category: SearchCategory = SearchCategory.ALL,
+    categories: Set<SearchCategory> = emptySet(),
     private val debounceMillis: Long = 350
 ) {
     private val mutableModel = MutableStateFlow(
-        SearchViewModel(query = query, category = category, connection = session.connection)
+        SearchViewModel(query = query, categories = categories)
     )
     val model = mutableModel.asStateFlow()
     private var searchJob: Job? = null
-    private var connectionJob: Job? = null
 
     fun updateQuery(query: String) {
         mutableModel.value = model.value.copy(query = query)
@@ -36,8 +35,10 @@ class SearchController(
     }
 
     fun selectCategory(category: SearchCategory) {
-        if (category == model.value.category) return
-        mutableModel.value = model.value.copy(category = category)
+        val selected = model.value.categories
+        mutableModel.value = model.value.copy(
+            categories = if (category in selected) selected - category else selected + category
+        )
         search(0)
     }
 
@@ -58,11 +59,10 @@ class SearchController(
             error = if (query.length > 100) SearchError.INVALID_QUERY else null
         )
         if (!valid) return
-        val repository = session.repository
         searchJob = scope.launch {
             try {
                 delay(waitMillis)
-                val result = repository.search(query, snapshot.category)
+                val result = repository.search(query, snapshot.categories)
                 currentCoroutineContext().ensureActive()
                 mutableModel.value = model.value.copy(
                     items = result.items, page = result.page, hasNext = result.hasNext,
@@ -81,10 +81,9 @@ class SearchController(
         val snapshot = model.value
         if (snapshot.isLoading || snapshot.isLoadingMore || !snapshot.hasNext) return
         mutableModel.value = snapshot.copy(isLoadingMore = true, error = null)
-        val repository = session.repository
         searchJob = scope.launch {
             try {
-                val result = repository.search(snapshot.query.trim(), snapshot.category, snapshot.page + 1)
+                val result = repository.search(snapshot.query.trim(), snapshot.categories, snapshot.page + 1)
                 currentCoroutineContext().ensureActive()
                 mutableModel.value = model.value.copy(
                     items = (snapshot.items + result.items).distinctBy { it.category to it.id },
@@ -98,40 +97,6 @@ class SearchController(
                 mutableModel.value = model.value.copy(isLoadingMore = false, error = exception.reason())
             }
         }
-    }
-
-    fun useSample() {
-        cancelConnection()
-        session.useSample()
-        mutableModel.value = model.value.copy(connection = session.connection)
-        search(0)
-    }
-
-    fun connect(address: String, username: String, password: String, onConnected: () -> Unit) {
-        connectionJob?.cancel()
-        mutableModel.value = model.value.copy(isConnecting = true, connectionError = null)
-        connectionJob = scope.launch {
-            try {
-                session.connect(address, username, password)
-                mutableModel.value = model.value.copy(
-                    connection = session.connection, isConnecting = false, connectionError = null
-                )
-                search(0)
-                onConnected()
-            } catch (exception: CancellationException) {
-                throw exception
-            } catch (exception: Exception) {
-                currentCoroutineContext().ensureActive()
-                mutableModel.value = model.value.copy(
-                    isConnecting = false, connectionError = exception.reason()
-                )
-            }
-        }
-    }
-
-    fun cancelConnection() {
-        connectionJob?.cancel()
-        mutableModel.value = model.value.copy(isConnecting = false, connectionError = null)
     }
 }
 

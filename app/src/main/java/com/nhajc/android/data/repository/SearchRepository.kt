@@ -11,7 +11,7 @@ import retrofit2.HttpException
 interface SearchRepository {
     suspend fun search(
         query: String,
-        category: SearchCategory = SearchCategory.ALL,
+        categories: Set<SearchCategory> = emptySet(),
         page: Int = 0,
         size: Int = 20
     ): SearchPageViewModel
