@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -28,6 +30,7 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Person
@@ -42,7 +45,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -68,49 +70,65 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.nhajc.android.R
-import com.nhajc.android.data.model.SettingsViewModel
-import com.nhajc.android.data.model.AccountViewModel
-import com.nhajc.android.data.datastore.AudioQuality
-import com.nhajc.android.data.datastore.ThemeMode
-import com.nhajc.android.ui.theme.NhajcTheme
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.nhajc.android.R
+import com.nhajc.android.data.model.AudioQuality
+import com.nhajc.android.data.model.ThemeMode
+import com.nhajc.android.data.model.User
+import com.nhajc.android.data.model.UserRole
+import com.nhajc.android.ui.common.message
+import com.nhajc.android.ui.theme.NhajcTheme
+import kotlin.uuid.Uuid
+
+@Composable
+fun SettingsScreen(onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val avatarPicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) {
+                viewModel.onAvatarPicked(uri)
+            }
+        }
+
+    SettingsScreen(
+        uiState = uiState,
+        onAudioQualityChange = viewModel::onAudioQualityChange,
+        onDownloadQualityChange = viewModel::onDownloadQualityChange,
+        onThemeModeChange = viewModel::onThemeModeChange,
+        onLogout = viewModel::logout,
+        onBack = onBack,
+        onChangeAvatar = { avatarPicker.launch(arrayOf("image/jpeg", "image/png")) },
+        onRemoveAvatar = viewModel::onRemoveAvatar
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(
-    model: SettingsViewModel,
+internal fun SettingsScreen(
+    uiState: SettingsUiState,
     onAudioQualityChange: (AudioQuality) -> Unit,
     onDownloadQualityChange: (AudioQuality) -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier,
-    onChangeAvatar: (() -> Unit)? = null,
-    onRemoveAvatar: (() -> Unit)? = null
+    onChangeAvatar: () -> Unit,
+    onRemoveAvatar: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val isBusy = model.isLoading || model.isLoggingOut
+    val isBusy = uiState.isLoggingOut
 
-    val themeOptions = mutableListOf<SettingsDropdownOption<ThemeMode>>()
-
-    for (mode in ThemeMode.entries) {
-        themeOptions.add(
-            SettingsDropdownOption(
-                value = mode,
-                title = stringResource(themeTitle(mode))
-            )
-        )
+    val themeOptions = ThemeMode.entries.map { mode ->
+        SettingsDropdownOption(mode, stringResource(themeTitle(mode)))
     }
 
-    val qualityOptions = mutableListOf<SettingsDropdownOption<AudioQuality>>()
-
-    for (quality in AudioQuality.entries) {
-        qualityOptions.add(
-            SettingsDropdownOption(
-                value = quality,
-                title = stringResource(qualityTitle(quality)),
-                description = stringResource(qualityDescription(quality))
-            )
+    val qualityOptions = AudioQuality.entries.map { quality ->
+        SettingsDropdownOption(
+            quality,
+            stringResource(qualityTitle(quality)),
+            stringResource(qualityDescription(quality))
         )
     }
 
@@ -127,7 +145,7 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
-                        enabled = !model.isLoggingOut
+                        enabled = !uiState.isLoggingOut
                     ) {
                         Icon(
                             Icons.AutoMirrored.Outlined.ArrowBack,
@@ -153,12 +171,6 @@ fun SettingsScreen(
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                if (model.isLoading) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
                 SectionTitle(stringResource(R.string.account))
 
                 Card(modifier = Modifier.fillMaxWidth()) {
@@ -168,8 +180,8 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         ProfileAvatar(
-                            avatarUrl = model.account?.avatarUrl,
-                            enabled = !isBusy && !model.isUpdatingAvatar,
+                            avatarUrl = uiState.user?.avatarUrl,
+                            enabled = !isBusy && !uiState.isUpdatingAvatar,
                             onChangeAvatar = onChangeAvatar,
                             onRemoveAvatar = onRemoveAvatar
                         )
@@ -179,13 +191,13 @@ fun SettingsScreen(
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = model.account?.username.orEmpty(),
+                                text = uiState.user?.username.orEmpty(),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
 
                             Text(
-                                text = model.account?.email.orEmpty(),
+                                text = uiState.user?.email.orEmpty(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -193,11 +205,18 @@ fun SettingsScreen(
                     }
                 }
 
+                if (uiState.error != null) {
+                    Text(
+                        text = stringResource(uiState.error.message()),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
                 SectionTitle(stringResource(R.string.appearance))
 
                 SettingsDropdown(
                     label = stringResource(R.string.theme),
-                    selectedValue = model.themeMode,
+                    selectedValue = uiState.themeMode,
                     options = themeOptions,
                     leadingIcon = Icons.Outlined.Palette,
                     enabled = !isBusy,
@@ -208,18 +227,18 @@ fun SettingsScreen(
 
                 SettingsDropdown(
                     label = stringResource(R.string.audio_quality),
-                    selectedValue = model.audioQuality,
+                    selectedValue = uiState.audioQuality,
                     options = qualityOptions,
                     leadingIcon = Icons.Outlined.GraphicEq,
                     enabled = !isBusy,
                     onValueChange = onAudioQualityChange
                 )
 
-                SectionTitle("Downloads")
+                SectionTitle(stringResource(R.string.downloads))
 
                 SettingsDropdown(
-                    label = stringResource(R.string.audio_quality),
-                    selectedValue = model.downloadQuality,
+                    label = stringResource(R.string.download_quality),
+                    selectedValue = uiState.downloadQuality,
                     options = qualityOptions,
                     leadingIcon = Icons.Outlined.Download,
                     enabled = !isBusy,
@@ -236,7 +255,7 @@ fun SettingsScreen(
                         contentColor = MaterialTheme.colorScheme.onSurface
                     )
                 ) {
-                    if (model.isLoggingOut) {
+                    if (uiState.isLoggingOut) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp
@@ -249,7 +268,7 @@ fun SettingsScreen(
                     }
 
                     Text(
-                        text = if (model.isLoggingOut) {
+                        text = if (uiState.isLoggingOut) {
                             stringResource(R.string.logging_out)
                         } else {
                             stringResource(R.string.log_out)
@@ -317,7 +336,9 @@ private fun <T> SettingsDropdown(
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 }
             },
-            supportingText = if (selectedOption?.description == null) null else {
+            supportingText = if (selectedOption?.description == null) {
+                null
+            } else {
                 { Text(selectedOption.description) }
             },
             shape = MaterialTheme.shapes.medium
@@ -386,14 +407,13 @@ private fun <T> SettingsDropdown(
 private fun ProfileAvatar(
     avatarUrl: String?,
     enabled: Boolean,
-    onChangeAvatar: (() -> Unit)?,
-    onRemoveAvatar: (() -> Unit)?
+    onChangeAvatar: () -> Unit,
+    onRemoveAvatar: () -> Unit
 ) {
     var showMenu by remember(avatarUrl) { mutableStateOf(false) }
 
     val hasAvatar = !avatarUrl.isNullOrBlank()
     val description = stringResource(R.string.profile_picture)
-    val canInteract = enabled && (hasAvatar || onChangeAvatar != null)
 
     Box {
         Surface(
@@ -401,10 +421,10 @@ private fun ProfileAvatar(
                 if (hasAvatar) {
                     showMenu = true
                 } else {
-                    onChangeAvatar?.invoke()
+                    onChangeAvatar()
                 }
             },
-            enabled = canInteract,
+            enabled = enabled,
             modifier = Modifier
                 .size(72.dp)
                 .semantics {
@@ -439,12 +459,22 @@ private fun ProfileAvatar(
             onDismissRequest = { showMenu = false }
         ) {
             DropdownMenuItem(
+                text = { Text(stringResource(R.string.change_photo)) },
+                onClick = {
+                    showMenu = false
+                    onChangeAvatar()
+                },
+                leadingIcon = {
+                    Icon(Icons.Outlined.Edit, contentDescription = null)
+                }
+            )
+
+            DropdownMenuItem(
                 text = { Text(stringResource(R.string.remove_photo)) },
                 onClick = {
                     showMenu = false
-                    onRemoveAvatar?.invoke()
+                    onRemoveAvatar()
                 },
-                enabled = onRemoveAvatar != null,
                 leadingIcon = {
                     Icon(Icons.Outlined.DeleteOutline, contentDescription = null)
                 }
@@ -464,32 +494,26 @@ private fun SectionTitle(title: String) {
 }
 
 @StringRes
-private fun themeTitle(mode: ThemeMode): Int {
-    return when (mode) {
-        ThemeMode.LIGHT -> R.string.theme_light
-        ThemeMode.DARK -> R.string.theme_dark
-        ThemeMode.SYSTEM -> R.string.theme_system
-    }
+private fun themeTitle(mode: ThemeMode): Int = when (mode) {
+    ThemeMode.LIGHT -> R.string.theme_light
+    ThemeMode.DARK -> R.string.theme_dark
+    ThemeMode.SYSTEM -> R.string.theme_system
 }
 
 @StringRes
-private fun qualityTitle(quality: AudioQuality): Int {
-    return when (quality) {
-        AudioQuality.LOW -> R.string.quality_low
-        AudioQuality.MEDIUM -> R.string.quality_medium
-        AudioQuality.HIGH -> R.string.quality_high
-        AudioQuality.LOSSLESS -> R.string.quality_lossless
-    }
+private fun qualityTitle(quality: AudioQuality): Int = when (quality) {
+    AudioQuality.LOW -> R.string.quality_low
+    AudioQuality.MEDIUM -> R.string.quality_medium
+    AudioQuality.HIGH -> R.string.quality_high
+    AudioQuality.LOSSLESS -> R.string.quality_lossless
 }
 
 @StringRes
-private fun qualityDescription(quality: AudioQuality): Int {
-    return when (quality) {
-        AudioQuality.LOW -> R.string.quality_low_description
-        AudioQuality.MEDIUM -> R.string.quality_medium_description
-        AudioQuality.HIGH -> R.string.quality_high_description
-        AudioQuality.LOSSLESS -> R.string.quality_lossless_description
-    }
+private fun qualityDescription(quality: AudioQuality): Int = when (quality) {
+    AudioQuality.LOW -> R.string.quality_low_description
+    AudioQuality.MEDIUM -> R.string.quality_medium_description
+    AudioQuality.HIGH -> R.string.quality_high_description
+    AudioQuality.LOSSLESS -> R.string.quality_lossless_description
 }
 
 @Preview(
@@ -506,12 +530,15 @@ private fun qualityDescription(quality: AudioQuality): Int {
 )
 @Composable
 private fun SettingsScreenPreview() {
-    var model by remember {
+    var uiState by remember {
         mutableStateOf(
-            SettingsViewModel(
-                account = AccountViewModel(
+            SettingsUiState(
+                user = User(
+                    id = Uuid.random(),
                     username = "nhajc",
-                    email = "nhajc@example.com"
+                    email = "nhajc@example.com",
+                    role = UserRole.USER,
+                    avatarUrl = null
                 ),
                 audioQuality = AudioQuality.MEDIUM,
                 downloadQuality = AudioQuality.LOSSLESS
@@ -521,18 +548,20 @@ private fun SettingsScreenPreview() {
 
     NhajcTheme(darkTheme = isSystemInDarkTheme()) {
         SettingsScreen(
-            model = model,
+            uiState = uiState,
             onAudioQualityChange = {
-                model = model.copy(audioQuality = it)
+                uiState = uiState.copy(audioQuality = it)
             },
             onDownloadQualityChange = {
-                model = model.copy(downloadQuality = it)
+                uiState = uiState.copy(downloadQuality = it)
             },
             onThemeModeChange = {
-                model = model.copy(themeMode = it)
+                uiState = uiState.copy(themeMode = it)
             },
             onLogout = {},
-            onBack = {}
+            onBack = {},
+            onChangeAvatar = {},
+            onRemoveAvatar = {}
         )
     }
 }

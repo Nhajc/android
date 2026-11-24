@@ -1,4 +1,4 @@
-package com.nhajc.android.ui.register
+package com.nhajc.android.ui.auth
 
 import android.content.res.Configuration
 import android.util.Patterns
@@ -31,15 +31,29 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.R
-import com.nhajc.android.data.model.RegisterViewModel
-import com.nhajc.android.ui.login.AuthContainer
-import com.nhajc.android.ui.login.PasswordInput
+import com.nhajc.android.ui.common.message
 import com.nhajc.android.ui.theme.NhajcTheme
 
 @Composable
-fun RegisterScreen(
-    model: RegisterViewModel,
+fun RegisterScreen(onLogin: () -> Unit, viewModel: RegisterViewModel = hiltViewModel()) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    RegisterScreen(
+        uiState = uiState,
+        onUsernameChange = viewModel::onUsernameChange,
+        onEmailChange = viewModel::onEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onRegister = viewModel::register,
+        onLogin = onLogin
+    )
+}
+
+@Composable
+internal fun RegisterScreen(
+    uiState: RegisterUiState,
     onUsernameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -47,28 +61,34 @@ fun RegisterScreen(
     onLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(model.email.trim()).matches()
+    val username = uiState.username.trim()
+    val isUsernameValid =
+        username.length in 3..50 && username.none { it == '@' || it.isWhitespace() }
 
-    val canSubmit = !model.isLoading &&
-            model.username.isNotBlank() &&
-            isEmailValid &&
-            model.password.isNotBlank()
+    val email = uiState.email.trim()
+    val isEmailValid = email.length <= 254 && Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+    val passwordBytes = uiState.password.encodeToByteArray().size
+    val isPasswordValid = uiState.password.length >= 12 && passwordBytes <= 72
+
+    val canSubmit = !uiState.isLoading && isUsernameValid && isEmailValid && isPasswordValid
 
     AuthContainer(
         title = stringResource(R.string.register_title),
-        modifier = modifier,
-        onBack = onLogin
+        modifier = modifier
     ) {
         OutlinedTextField(
-            value = model.username,
+            value = uiState.username,
             onValueChange = onUsernameChange,
             modifier = Modifier.fillMaxWidth(),
-            enabled = !model.isLoading,
+            enabled = !uiState.isLoading,
             singleLine = true,
             label = { Text(stringResource(R.string.username)) },
             leadingIcon = {
                 Icon(Icons.Outlined.Person, contentDescription = null)
             },
+            isError = uiState.username.isNotEmpty() && !isUsernameValid,
+            supportingText = { Text(stringResource(R.string.username_rule)) },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next,
                 autoCorrectEnabled = false
@@ -77,21 +97,23 @@ fun RegisterScreen(
         )
 
         OutlinedTextField(
-            value = model.email,
+            value = uiState.email,
             onValueChange = onEmailChange,
             modifier = Modifier.fillMaxWidth(),
-            enabled = !model.isLoading,
+            enabled = !uiState.isLoading,
             singleLine = true,
             label = { Text(stringResource(R.string.email)) },
             placeholder = { Text(stringResource(R.string.email_placeholder)) },
             leadingIcon = {
                 Icon(Icons.Outlined.Email, contentDescription = null)
             },
-            isError = model.email.isNotBlank() && !isEmailValid,
-            supportingText = if (model.email.isNotBlank() && !isEmailValid) {
-                { Text(stringResource(R.string.invalid_email)) }
-            } else {
-                null
+            isError = uiState.email.isNotBlank() && !isEmailValid,
+            supportingText = {
+                if (uiState.email.isNotBlank() && !isEmailValid) {
+                    Text(stringResource(R.string.invalid_email))
+                } else {
+                    Text("")
+                }
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
@@ -102,15 +124,24 @@ fun RegisterScreen(
         )
 
         PasswordInput(
-            value = model.password,
+            value = uiState.password,
             onValueChange = onPasswordChange,
-            enabled = !model.isLoading,
+            enabled = !uiState.isLoading,
             onSubmit = {
                 if (canSubmit) {
                     onRegister()
                 }
-            }
+            },
+            isError = uiState.password.isNotEmpty() && !isPasswordValid,
+            supportingText = stringResource(R.string.password_rule)
         )
+
+        if (uiState.error != null) {
+            Text(
+                text = stringResource(uiState.error.message()),
+                color = MaterialTheme.colorScheme.error
+            )
+        }
 
         Button(
             onClick = onRegister,
@@ -122,7 +153,7 @@ fun RegisterScreen(
                 disabledContentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
-            if (model.isLoading) {
+            if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(22.dp),
                     color = MaterialTheme.colorScheme.onPrimary,
@@ -140,7 +171,7 @@ fun RegisterScreen(
         OutlinedButton(
             onClick = onLogin,
             modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-            enabled = !model.isLoading,
+            enabled = !uiState.isLoading,
             shape = CircleShape,
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface
@@ -165,14 +196,14 @@ fun RegisterScreen(
 )
 @Composable
 private fun RegisterScreenPreview() {
-    var model by remember { mutableStateOf(RegisterViewModel()) }
+    var uiState by remember { mutableStateOf(RegisterUiState()) }
 
     NhajcTheme(darkTheme = isSystemInDarkTheme()) {
         RegisterScreen(
-            model = model,
-            onUsernameChange = { model = model.copy(username = it) },
-            onEmailChange = { model = model.copy(email = it) },
-            onPasswordChange = { model = model.copy(password = it) },
+            uiState = uiState,
+            onUsernameChange = { uiState = uiState.copy(username = it) },
+            onEmailChange = { uiState = uiState.copy(email = it) },
+            onPasswordChange = { uiState = uiState.copy(password = it) },
             onRegister = {},
             onLogin = {}
         )
