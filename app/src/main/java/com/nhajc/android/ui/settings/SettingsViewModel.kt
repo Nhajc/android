@@ -1,6 +1,7 @@
 package com.nhajc.android.ui.settings
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nhajc.android.data.model.AppException
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+private const val TAG = "SettingsViewModel"
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -44,7 +47,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 userRepository.refreshUser()
-            } catch (_: AppException) {
+            } catch (exception: AppException) {
+                Log.w(TAG, "Refreshing the user failed", exception)
             }
         }
     }

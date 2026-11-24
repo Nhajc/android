@@ -2,6 +2,7 @@ package com.nhajc.android.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.nhajc.android.data.database.AppDatabase
 import com.nhajc.android.data.datastore.AuthTokens
 import com.nhajc.android.data.datastore.SessionDataStore
@@ -29,6 +30,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
+
+private const val TAG = "UserRepository"
 
 @Singleton
 class UserRepository @Inject constructor(
@@ -83,7 +86,8 @@ class UserRepository @Inject constructor(
 
         try {
             call { authApi.logout(RefreshTokenRequest(tokens.refreshToken)) }
-        } catch (_: AppException) {
+        } catch (exception: AppException) {
+            Log.w(TAG, "Logout request failed, clearing tokens anyway", exception)
         }
 
         session.clearTokens()
