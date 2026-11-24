@@ -5,9 +5,9 @@ import android.net.Uri
 import com.nhajc.android.data.database.AppDatabase
 import com.nhajc.android.data.datastore.AuthTokens
 import com.nhajc.android.data.datastore.SessionDataStore
+import com.nhajc.android.data.model.AppError
+import com.nhajc.android.data.model.AppException
 import com.nhajc.android.data.model.User
-import com.nhajc.android.data.model.UserError
-import com.nhajc.android.data.model.UserException
 import com.nhajc.android.data.network.AuthApi
 import com.nhajc.android.data.network.UserApi
 import com.nhajc.android.data.network.model.AuthResponse
@@ -43,7 +43,7 @@ class UserRepository @Inject constructor(
     val user: Flow<User?> = session.user
 
     suspend fun login(usernameOrEmail: String, password: String) {
-        val response = call(unauthorized = UserError.INVALID_CREDENTIALS) {
+        val response = call(unauthorized = AppError.INVALID_CREDENTIALS) {
             authApi.login(LoginRequest(usernameOrEmail, password))
         }
 
@@ -71,7 +71,7 @@ class UserRepository @Inject constructor(
             readAvatar(uri)
         }
 
-        val response = call(badRequest = UserError.INVALID_AVATAR) {
+        val response = call(badRequest = AppError.INVALID_AVATAR) {
             userApi.updateMe(UpdateProfileRequest, avatar)
         }
 
@@ -83,7 +83,7 @@ class UserRepository @Inject constructor(
 
         try {
             call { authApi.logout(RefreshTokenRequest(tokens.refreshToken)) }
-        } catch (_: UserException) {
+        } catch (_: AppException) {
         }
 
         session.clearTokens()
@@ -104,16 +104,16 @@ class UserRepository @Inject constructor(
 
     private suspend fun readAvatar(uri: Uri): MultipartBody.Part = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
-        val type = resolver.getType(uri) ?: throw UserException(UserError.INVALID_AVATAR)
+        val type = resolver.getType(uri) ?: throw AppException(AppError.INVALID_AVATAR)
         val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
-            ?: throw UserException(UserError.INVALID_AVATAR)
+            ?: throw AppException(AppError.INVALID_AVATAR)
 
         MultipartBody.Part.createFormData("file", "avatar", bytes.toRequestBody(type.toMediaType()))
     }
 
     private suspend fun <T> call(
-        unauthorized: UserError = UserError.SESSION_ENDED,
-        badRequest: UserError = UserError.INVALID_INPUT,
+        unauthorized: AppError = AppError.SESSION_ENDED,
+        badRequest: AppError = AppError.INVALID_INPUT,
         block: suspend () -> T
     ): T {
         try {
@@ -122,14 +122,14 @@ class UserRepository @Inject constructor(
             val error = when (exception.code()) {
                 400 -> badRequest
                 401 -> unauthorized
-                409 -> UserError.USER_EXISTS
-                413 -> UserError.INVALID_AVATAR
-                else -> UserError.SERVER
+                409 -> AppError.USER_EXISTS
+                413 -> AppError.INVALID_AVATAR
+                else -> AppError.SERVER
             }
 
-            throw UserException(error, exception)
+            throw AppException(error, exception)
         } catch (exception: IOException) {
-            throw UserException(UserError.NETWORK, exception)
+            throw AppException(AppError.NETWORK, exception)
         }
     }
 }

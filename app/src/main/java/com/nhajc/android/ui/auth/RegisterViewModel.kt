@@ -2,7 +2,7 @@ package com.nhajc.android.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nhajc.android.data.model.UserException
+import com.nhajc.android.data.model.AppException
 import com.nhajc.android.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -43,7 +43,7 @@ class RegisterViewModel @Inject constructor(private val userRepository: UserRepo
             try {
                 userRepository.register(state.username.trim(), state.email.trim(), state.password)
                 _uiState.update { it.copy(password = "") }
-            } catch (exception: UserException) {
+            } catch (exception: AppException) {
                 _uiState.update { it.copy(error = exception.error) }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }

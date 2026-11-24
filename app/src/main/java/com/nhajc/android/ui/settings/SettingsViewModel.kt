@@ -3,9 +3,9 @@ package com.nhajc.android.ui.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nhajc.android.data.model.AppException
 import com.nhajc.android.data.model.AudioQuality
 import com.nhajc.android.data.model.ThemeMode
-import com.nhajc.android.data.model.UserException
 import com.nhajc.android.data.repository.SettingsRepository
 import com.nhajc.android.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,7 +44,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 userRepository.refreshUser()
-            } catch (_: UserException) {
+            } catch (_: AppException) {
             }
         }
     }
@@ -91,7 +91,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 userRepository.updateAvatar(uri)
-            } catch (exception: UserException) {
+            } catch (exception: AppException) {
                 state.update { it.copy(error = exception.error) }
             } finally {
                 state.update { it.copy(isUpdatingAvatar = false) }

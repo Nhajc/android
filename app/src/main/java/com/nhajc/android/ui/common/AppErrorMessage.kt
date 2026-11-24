@@ -54,16 +54,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nhajc.android.R
-import com.nhajc.android.data.model.UserError
+import com.nhajc.android.data.model.AppError
 import com.nhajc.android.ui.theme.NhajcTheme
 
 @StringRes
-fun UserError.message(): Int = when (this) {
-    UserError.INVALID_CREDENTIALS -> R.string.error_invalid_credentials
-    UserError.USER_EXISTS -> R.string.error_user_exists
-    UserError.INVALID_INPUT -> R.string.error_invalid_input
-    UserError.INVALID_AVATAR -> R.string.error_invalid_avatar
-    UserError.SESSION_ENDED -> R.string.error_session_ended
-    UserError.NETWORK -> R.string.error_network
-    UserError.SERVER -> R.string.error_server
+fun AppError.message(): Int = when (this) {
+    AppError.INVALID_CREDENTIALS -> R.string.error_invalid_credentials
+    AppError.USER_EXISTS -> R.string.error_user_exists
+    AppError.INVALID_INPUT -> R.string.error_invalid_input
+    AppError.INVALID_AVATAR -> R.string.error_invalid_avatar
+    AppError.SESSION_ENDED -> R.string.error_session_ended
+    AppError.NETWORK -> R.string.error_network
+    AppError.SERVER -> R.string.error_server
 }

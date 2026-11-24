@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.R
-import com.nhajc.android.data.model.UserError
+import com.nhajc.android.data.model.AppError
 import com.nhajc.android.ui.common.message
 import com.nhajc.android.ui.theme.NhajcTheme
 
