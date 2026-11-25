@@ -52,7 +52,9 @@ import com.nhajc.android.data.repository.SearchRepository
 import com.nhajc.android.ui.auth.LoginScreen
 import com.nhajc.android.ui.auth.RegisterScreen
 import com.nhajc.android.ui.admin.AdminRoute
+import com.nhajc.android.ui.downloads.DownloadsScreen
 import com.nhajc.android.ui.home.HomeScreen
+import com.nhajc.android.ui.library.LibraryScreen
 import com.nhajc.android.ui.search.SearchRoute
 import com.nhajc.android.ui.settings.SettingsScreen
 import kotlinx.serialization.Serializable
@@ -77,6 +79,9 @@ data object SettingsNavKey : NavKey
 
 @Serializable
 data object AdminNavKey : NavKey
+
+@Serializable
+data object DownloadsNavKey : NavKey
 
 private enum class TopLevelDestination(
     val navKey: NavKey,
@@ -174,7 +179,16 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                     SearchRoute(searchRepository)
                 }
 
-                entry<LibraryNavKey>(metadata = fadeThroughMetadata()) {}
+                entry<LibraryNavKey>(metadata = fadeThroughMetadata()) {
+                    LibraryScreen(
+                        onOpenSettings = { backStack.add(SettingsNavKey) },
+                        onOpenDownloads = { backStack.add(DownloadsNavKey) }
+                    )
+                }
+
+                entry<DownloadsNavKey> {
+                    DownloadsScreen(onBack = { backStack.removeLastOrNull() })
+                }
 
                 entry<SettingsNavKey> {
                     SettingsScreen(onBack = { backStack.removeLastOrNull() })

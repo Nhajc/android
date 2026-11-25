@@ -34,6 +34,9 @@ interface PlaylistDao {
     @Upsert(entity = PlaylistEntity::class)
     suspend fun upsertFromServer(playlists: List<PlaylistInfo>)
 
+    @Query("UPDATE Playlists SET lastActivityAt = NULL")
+    suspend fun clearLastActivityAt()
+
     @Query("UPDATE Playlists SET lastActivityAt = :lastActivityAt WHERE id = :id")
     suspend fun setLastActivityAt(id: Uuid, lastActivityAt: Instant?)
 

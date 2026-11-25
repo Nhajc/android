@@ -12,6 +12,9 @@ interface ArtistDao {
     @Upsert
     suspend fun upsert(artists: List<ArtistEntity>)
 
+    @Query("UPDATE Artists SET followedAt = NULL")
+    suspend fun clearFollowedAt()
+
     @Query("UPDATE Artists SET followedAt = :followedAt WHERE id = :id")
     suspend fun setFollowedAt(id: Uuid, followedAt: Instant?)
 }

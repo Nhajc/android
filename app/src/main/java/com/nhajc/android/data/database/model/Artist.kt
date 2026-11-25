@@ -2,6 +2,7 @@ package com.nhajc.android.data.database.model
 
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
+import com.nhajc.android.data.model.ArtistSummary
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -13,3 +14,6 @@ data class ArtistEntity(
     val avatarUrl: String?,
     val followedAt: Instant?
 )
+
+fun ArtistEntity.asModel(): ArtistSummary =
+    ArtistSummary(id = id, name = name, avatarUrl = avatarUrl)

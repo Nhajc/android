@@ -8,6 +8,7 @@ import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.Junction
 import androidx.room3.Relation
+import com.nhajc.android.data.model.Song
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -95,3 +96,19 @@ data class SongWithArtists(
     """
 )
 data class WantedSongView(val id: Uuid)
+
+fun SongWithArtists.asModel(): Song {
+    val positions = credits.associate { it.artistId to it.position }
+    val sortedArtists = artists.sortedBy { positions[it.id] }
+
+    return Song(
+        id = song.info.id,
+        title = song.info.title,
+        trackNumber = song.info.trackNumber,
+        durationSeconds = song.info.durationSeconds,
+        artists = sortedArtists.map { it.asModel() },
+        releaseId = song.info.releaseId,
+        releaseTitle = song.info.releaseTitle,
+        coverUrl = song.info.coverUrl
+    )
+}

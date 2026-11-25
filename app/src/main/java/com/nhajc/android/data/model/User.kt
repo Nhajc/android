@@ -10,16 +10,6 @@ data class User(
     val avatarUrl: String?
 )
 
+data class UserSummary(val id: Uuid, val username: String, val avatarUrl: String?)
+
 enum class UserRole { USER, ADMIN }
-
-enum class UserError {
-    INVALID_CREDENTIALS,
-    USER_EXISTS,
-    INVALID_INPUT,
-    INVALID_AVATAR,
-    SESSION_ENDED,
-    NETWORK,
-    SERVER
-}
-
-class UserException(val error: UserError, cause: Throwable? = null) : Exception(error.name, cause)

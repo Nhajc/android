@@ -27,6 +27,9 @@ interface ReleaseDao {
     @Upsert(entity = ReleaseEntity::class)
     suspend fun upsertFromServer(releases: List<ReleaseInfo>)
 
+    @Query("UPDATE Releases SET lastActivityAt = NULL")
+    suspend fun clearLastActivityAt()
+
     @Query("UPDATE Releases SET lastActivityAt = :lastActivityAt WHERE id = :id")
     suspend fun setLastActivityAt(id: Uuid, lastActivityAt: Instant?)
 
