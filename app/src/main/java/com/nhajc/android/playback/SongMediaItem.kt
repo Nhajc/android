@@ -18,11 +18,20 @@ fun Song.asMediaItem(quality: AudioQuality): MediaItem {
         .setIsBrowsable(false)
         .build()
 
-    return MediaItem.Builder()
+    val builder = MediaItem.Builder()
         .setMediaId(id.toString())
-        .setUri(audioUrl(id, quality))
         .setMediaMetadata(metadata)
-        .build()
+
+    val fileQuality = fileQuality
+
+    if (isDownloaded && fileQuality != null) {
+        builder.setUri(audioUrl(id, fileQuality))
+        builder.setCustomCacheKey(downloadId(id, fileQuality))
+    } else {
+        builder.setUri(audioUrl(id, quality))
+    }
+
+    return builder.build()
 }
 
 fun audioUrl(songId: Uuid, quality: AudioQuality): String =

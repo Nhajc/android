@@ -58,8 +58,10 @@ class QueueRepository @Inject constructor(
         settingsRepository.setQueuePosition(position)
     }
 
+    suspend fun songs(): List<Song> = queueDao.observeSongs().first().map { it.asModel() }
+
     suspend fun saved(): SavedQueue {
-        val songs = queueDao.observeSongs().first().map { it.asModel() }
+        val songs = songs()
         val position = settingsRepository.queuePosition.first()
 
         return SavedQueue(songs, position)

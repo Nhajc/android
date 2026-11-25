@@ -7,6 +7,8 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -35,6 +37,9 @@ class PlaybackService : MediaLibraryService() {
     lateinit var okHttpClient: OkHttpClient
 
     @Inject
+    lateinit var downloadCache: Cache
+
+    @Inject
     lateinit var queueRepository: QueueRepository
 
     @Inject
@@ -52,7 +57,12 @@ class PlaybackService : MediaLibraryService() {
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build()
 
-        val mediaSourceFactory = DefaultMediaSourceFactory(OkHttpDataSource.Factory(okHttpClient))
+        val dataSourceFactory = CacheDataSource.Factory()
+            .setCache(downloadCache)
+            .setUpstreamDataSourceFactory(OkHttpDataSource.Factory(okHttpClient))
+            .setCacheWriteDataSinkFactory(null)
+
+        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
 
         val player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(mediaSourceFactory)

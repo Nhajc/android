@@ -50,9 +50,10 @@ class PlaybackController @Inject constructor(
 
         val player = player.filterNotNull().first()
         val quality = settingsRepository.audioQuality.first()
-        val items = songs.map { it.asMediaItem(quality) }
 
         queueRepository.replace(songs)
+
+        val items = queueRepository.songs().map { it.asMediaItem(quality) }
 
         player.setMediaItems(items, startIndex, 0L)
         player.prepare()
