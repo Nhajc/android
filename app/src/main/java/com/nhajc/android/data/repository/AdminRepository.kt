@@ -24,16 +24,16 @@ import retrofit2.HttpException
 
 @Singleton
 class AdminRepository @Inject constructor(
-    private val artists: ArtistApi, private val genres: GenreApi,
-    private val releases: ReleaseApi, private val songs: SongApi,
+    private val admin: AdminApi, private val artists: ArtistApi,
+    private val genres: GenreApi, private val releases: ReleaseApi,
     @ApplicationContext private val context: Context
 ) {
     suspend fun findArtists(query: String, page: Int = 0): AdminList<AdminArtist> = adminCall {
-        val response = artists.listArtists(query.trim().takeIf { it.isNotEmpty() }, page, 20)
+        val response = admin.listArtists(query.trim().takeIf { it.isNotEmpty() }, page, 20)
         AdminList(response.content.map { it.admin() }, response.page, response.hasNext)
     }
     suspend fun findReleases(query: String, page: Int = 0): AdminList<AdminRelease> = adminCall {
-        val response = releases.listReleases(query.trim().takeIf { it.isNotEmpty() }, page, 20)
+        val response = admin.listReleases(query.trim().takeIf { it.isNotEmpty() }, page, 20)
         AdminList(response.content.map { it.admin() }, response.page, response.hasNext)
     }
     suspend fun getGenres(page: Int = 0): AdminList<AdminGenre> = adminCall {
@@ -52,32 +52,32 @@ class AdminRepository @Inject constructor(
             result.artists.map { it.admin() })
     }
     suspend fun stageSong(id: Uuid, file: AdminFile, progress: (Float?) -> Unit, processing: () -> Unit): StagedSongResponse = adminCall {
-        songs.stageSong(id, file.part(AUDIO_LIMIT, progress, processing))
+        admin.stageSong(id, file.part(AUDIO_LIMIT, progress, processing))
     }
     suspend fun saveUploads(id: Uuid, uploads: List<UploadQueueItem>, order: List<Uuid>): Unit = adminCall(AdminError.ORDER_CHANGED) {
-        songs.saveUploads(id, SaveUploadedSongsRequest(uploads.map {
+        admin.saveUploads(id, SaveUploadedSongsRequest(uploads.map {
             UploadedSongDetails(requireNotNull(it.uploadedId), it.title.trim(), it.description.trim().takeIf(String::isNotEmpty), it.artists.map { a -> a.id })
         }, order))
     }
-    suspend fun discardUpload(id: Uuid, uploadId: Uuid): Unit = adminCall { songs.discardUpload(id, uploadId) }
+    suspend fun discardUpload(id: Uuid, uploadId: Uuid): Unit = adminCall { admin.discardUpload(id, uploadId) }
     suspend fun reorderSongs(id: Uuid, ids: List<Uuid>): Unit = adminCall(AdminError.ORDER_CHANGED) {
-        releases.reorderSongs(id, ReorderSongsRequest(ids))
+        admin.reorderSongs(id, ReorderSongsRequest(ids))
     }
     suspend fun createArtist(draft: ArtistDraft): AdminArtistDetail = adminCall {
         AdminValidation.name(draft.name)?.let { throw AdminException(it) }
-        val id = artists.createArtist(ArtistRequest(draft.name.trim()), draft.image?.part(IMAGE_LIMIT)).id
+        val id = admin.createArtist(ArtistRequest(draft.name.trim()), draft.image?.part(IMAGE_LIMIT)).id
         // Creation is already confirmed by HTTP 201. Reading the detail is a
         // separate action, so a later connection failure must not invite a duplicate POST.
         AdminArtistDetail(AdminArtist(id, draft.name.trim(), draft.image?.uri?.toString()), emptyList())
     }
     suspend fun createGenre(name: String): Unit = adminCall(AdminError.GENRE_EXISTS) {
         AdminValidation.name(name, 100)?.let { throw AdminException(it) }
-        genres.createGenre(GenreRequest(name.trim()))
+        admin.createGenre(GenreRequest(name.trim()))
         Unit
     }
     suspend fun createRelease(draft: ReleaseDraft): AdminReleaseDetail = adminCall {
         AdminValidation.release(draft)?.let { throw AdminException(it) }
-        val result = releases.createRelease(ReleaseRequest(draft.title.trim(), draft.type,
+        val result = admin.createRelease(ReleaseRequest(draft.title.trim(), draft.type,
             LocalDate.parse(draft.date.trim()), draft.artists.map { it.id }, draft.genreIds.toList()), draft.image?.part(IMAGE_LIMIT))
         AdminReleaseDetail(AdminRelease(result.id, draft.title.trim(), draft.image?.uri?.toString(), draft.type,
             draft.date.trim(), draft.artists.map { it.name }, 0), emptyList(), draft.artists)
@@ -85,7 +85,7 @@ class AdminRepository @Inject constructor(
     suspend fun uploadSong(id: Uuid, draft: SongDraft, onProgress: (Float?) -> Unit, onProcessing: () -> Unit): Unit =
         adminCall(AdminError.TRACK_EXISTS) {
             AdminValidation.song(draft, emptySet())?.let { throw AdminException(it) }
-            songs.uploadSong(id, UploadSongRequest(draft.trackNumber.trim().toInt(), draft.title.trim()),
+            admin.uploadSong(id, UploadSongRequest(draft.trackNumber.trim().toInt(), draft.title.trim()),
                 requireNotNull(draft.audio).part(AUDIO_LIMIT, onProgress, onProcessing))
             Unit
         }

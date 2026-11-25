@@ -8,12 +8,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.data.model.SearchCategory
 import com.nhajc.android.data.repository.SearchRepository
+import kotlin.uuid.Uuid
 
 @Composable
-fun SearchRoute(repository: SearchRepository) {
+fun SearchRoute(
+    repository: SearchRepository,
+    onOpenArtist: (Uuid) -> Unit,
+    playbackViewModel: SearchPlaybackViewModel = hiltViewModel()
+) {
     var query by rememberSaveable { mutableStateOf("") }
     var categoryNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val scope = rememberCoroutineScope()
@@ -33,6 +39,15 @@ fun SearchRoute(repository: SearchRepository) {
         },
         onSubmit = controller::submit,
         onRetry = controller::retry,
-        onLoadMore = controller::loadMore
+        onLoadMore = controller::loadMore,
+        onSongClick = { item ->
+            val songs = model.items.mapNotNull { it.song }
+            val index = songs.indexOfFirst { it.id == item.song?.id }
+
+            if (index >= 0) {
+                playbackViewModel.play(songs, index)
+            }
+        },
+        onArtistClick = { item -> onOpenArtist(Uuid.parse(item.id)) }
     )
 }

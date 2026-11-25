@@ -1,8 +1,10 @@
 package com.nhajc.android.data.repository
 
+import com.nhajc.android.data.model.ArtistSummary
 import com.nhajc.android.data.model.SearchCategory
 import com.nhajc.android.data.model.SearchItemViewModel
 import com.nhajc.android.data.model.SearchPageViewModel
+import com.nhajc.android.data.model.Song
 import com.nhajc.android.data.network.SearchApi
 import com.nhajc.android.data.network.model.ArtistSummaryResponse
 import com.nhajc.android.data.network.model.PlaylistSummaryResponse
@@ -57,7 +59,13 @@ private fun SearchItemResponse.toViewModel(): SearchItemViewModel? = when (this)
     is SongResponse -> SearchItemViewModel(
         id = id.toString(), category = SearchCategory.SONG, title = title,
         imageUrl = coverUrl, artists = artists.map { it.name },
-        releaseTitle = releaseTitle, durationSeconds = durationSeconds
+        releaseTitle = releaseTitle, durationSeconds = durationSeconds,
+        song = Song(
+            id = id, title = title, trackNumber = trackNumber, durationSeconds = durationSeconds,
+            artists = artists.map { ArtistSummary(it.id, it.name, it.avatarUrl) },
+            releaseId = releaseId, releaseTitle = releaseTitle, coverUrl = coverUrl,
+            isFavorite = favoritedAt != null
+        )
     )
     is ReleaseSummaryResponse -> SearchItemViewModel(
         id = id.toString(), category = SearchCategory.RELEASE, title = title,

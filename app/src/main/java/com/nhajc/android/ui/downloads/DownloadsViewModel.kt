@@ -9,6 +9,7 @@ import com.nhajc.android.data.model.LibraryView
 import com.nhajc.android.data.model.Song
 import com.nhajc.android.data.repository.LibraryRepository
 import com.nhajc.android.data.repository.SettingsRepository
+import com.nhajc.android.playback.PlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,8 +28,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class DownloadsViewModel @Inject constructor(
-    libraryRepository: LibraryRepository,
-    private val settingsRepository: SettingsRepository
+    private val libraryRepository: LibraryRepository,
+    private val settingsRepository: SettingsRepository,
+    private val playbackController: PlaybackController
 ) : ViewModel() {
     private val state = MutableStateFlow(DownloadsUiState())
 
@@ -45,6 +47,16 @@ class DownloadsViewModel @Inject constructor(
     val songs: Flow<PagingData<Song>> = combine(query, sort, ::Pair)
         .flatMapLatest { (query, sort) -> libraryRepository.downloads(query, sort) }
         .cachedIn(viewModelScope)
+
+    fun onSongClick(index: Int) {
+        val current = uiState.value
+
+        viewModelScope.launch {
+            val songs = libraryRepository.downloadList(current.query, current.sort)
+
+            playbackController.play(songs, index)
+        }
+    }
 
     fun onSortChange(sort: DownloadSort) {
         viewModelScope.launch { settingsRepository.setDownloadSort(sort) }

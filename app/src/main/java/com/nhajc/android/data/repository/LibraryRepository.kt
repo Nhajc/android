@@ -37,6 +37,7 @@ import com.nhajc.android.data.network.model.UserSummaryResponse
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -79,6 +80,30 @@ class LibraryRepository @Inject constructor(
     fun downloads(query: String, sort: DownloadSort): Flow<PagingData<Song>> =
         pager { libraryDao.downloads(searchKey(query), sort) }
             .map { page -> page.map { it.asModel() } }
+
+    suspend fun favoriteList(query: String, sort: LibrarySort): List<Song> =
+        libraryDao.songList(searchKey(query), sort).map { it.asModel() }
+
+    suspend fun downloadList(query: String, sort: DownloadSort): List<Song> =
+        libraryDao.downloadList(searchKey(query), sort).map { it.asModel() }
+
+    fun song(id: Uuid): Flow<Song?> = songDao.observe(id).map { it?.asModel() }
+
+    suspend fun setFavorite(songId: Uuid, isFavorite: Boolean) {
+        if (isFavorite) {
+            call { libraryApi.favoriteSong(songId) }
+        } else {
+            call { libraryApi.unfavoriteSong(songId) }
+        }
+
+        val favoritedAt = if (isFavorite) {
+            Clock.System.now()
+        } else {
+            null
+        }
+
+        songDao.setFavoritedAt(songId, favoritedAt)
+    }
 
     suspend fun createPlaylist(title: String) {
         val request = PlaylistRequest(title = title, isPrivate = false, songIds = emptyList())
@@ -191,7 +216,7 @@ private fun searchKey(query: String): String? {
     return searchText(trimmed)
 }
 
-private fun searchText(text: String): String = StringUtils.stripAccents(text).lowercase()
+internal fun searchText(text: String): String = StringUtils.stripAccents(text).lowercase()
 
 private fun UserSummaryResponse.asEntity() =
     UserEntity(id = id, username = username, avatarUrl = avatarUrl)

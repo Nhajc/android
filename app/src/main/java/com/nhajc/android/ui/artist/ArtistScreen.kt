@@ -57,6 +57,7 @@ import com.nhajc.android.data.model.Artist
 import com.nhajc.android.data.model.ArtistError
 import com.nhajc.android.data.model.ArtistRelease
 import com.nhajc.android.data.model.ReleaseType
+import com.nhajc.android.ui.common.label
 import com.nhajc.android.ui.theme.NhajcTheme
 import kotlin.uuid.Uuid
 import kotlinx.datetime.LocalDate
@@ -264,7 +265,7 @@ private fun ArtistReleaseItem(release: ArtistRelease) {
             Text(
                 text = stringResource(
                     R.string.artist_release_metadata,
-                    stringResource(releaseTypeTitle(release.releaseType)),
+                    stringResource(release.releaseType.label()),
                     release.releaseDate.year,
                     songCount
                 )
@@ -292,17 +293,6 @@ private fun ArtistReleaseItem(release: ArtistRelease) {
         },
         colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     )
-}
-
-@StringRes
-private fun releaseTypeTitle(type: ReleaseType): Int {
-    return when (type) {
-        ReleaseType.ALBUM -> R.string.artist_release_album
-        ReleaseType.SINGLE -> R.string.artist_release_single
-        ReleaseType.EP -> R.string.artist_release_ep
-        ReleaseType.COMPILATION -> R.string.artist_release_compilation
-        ReleaseType.UNKNOWN -> R.string.artist_release_unknown
-    }
 }
 
 @StringRes

@@ -79,7 +79,7 @@ class ArtistViewModel @Inject constructor(
 
         followJob = viewModelScope.launch {
             try {
-                artistRepository.setFollowed(artist.id, followed)
+                artistRepository.setFollowed(artist, followed)
                 currentCoroutineContext().ensureActive()
 
                 state.update {

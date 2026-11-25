@@ -7,6 +7,7 @@ import com.nhajc.android.BuildConfig
 import com.nhajc.android.data.database.AppDatabase
 import com.nhajc.android.data.datastore.SessionDataStore
 import com.nhajc.android.data.datastore.sessionDataStore
+import com.nhajc.android.data.network.AdminApi
 import com.nhajc.android.data.network.ArtistApi
 import com.nhajc.android.data.network.AuthApi
 import com.nhajc.android.data.network.GenreApi
@@ -14,7 +15,6 @@ import com.nhajc.android.data.network.LibraryApi
 import com.nhajc.android.data.network.PlaylistApi
 import com.nhajc.android.data.network.ReleaseApi
 import com.nhajc.android.data.network.SearchApi
-import com.nhajc.android.data.network.SongApi
 import com.nhajc.android.data.network.TokenAuthenticator
 import com.nhajc.android.data.network.TokenInterceptor
 import com.nhajc.android.data.network.UserApi
@@ -28,9 +28,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
-import java.util.concurrent.TimeUnit
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -93,13 +93,20 @@ object AppModule {
     )
 
     @Provides
-    fun artistApi(@Named("admin") retrofit: Retrofit): ArtistApi = retrofit.create()
+    @Singleton
+    fun adminApi(@Named("admin") retrofit: Retrofit): AdminApi = retrofit.create()
+
     @Provides
-    fun genreApi(@Named("admin") retrofit: Retrofit): GenreApi = retrofit.create()
+    @Singleton
+    fun artistApi(retrofit: Retrofit): ArtistApi = retrofit.create()
+
     @Provides
-    fun releaseApi(@Named("admin") retrofit: Retrofit): ReleaseApi = retrofit.create()
+    @Singleton
+    fun genreApi(retrofit: Retrofit): GenreApi = retrofit.create()
+
     @Provides
-    fun songApi(@Named("admin") retrofit: Retrofit): SongApi = retrofit.create()
+    @Singleton
+    fun releaseApi(retrofit: Retrofit): ReleaseApi = retrofit.create()
 
     @Provides
     @Singleton

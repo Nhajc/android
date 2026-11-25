@@ -79,6 +79,15 @@
     <string name="playlist_name">Name</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
+    <string name="close_player">Close player</string>
+    <string name="up_next">Up next</string>
+    <string name="comments">Comments</string>
+    <string name="comments_coming_soon">Comments are coming soon.</string>
+    <string name="more_options">More options</string>
+    <string name="add_to_playlist">Add to playlist</string>
+    <string name="download">Download</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
     <string name="artist_title">Artist</string>
     <string name="artist_loading">Loading artist…</string>
     <string name="artist_retry">Try again</string>
@@ -87,11 +96,6 @@
     <string name="artist_releases">Releases</string>
     <string name="artist_no_releases">No releases yet</string>
     <string name="artist_release_metadata">%1$s · %2$d · %3$s</string>
-    <string name="artist_release_album">Album</string>
-    <string name="artist_release_single">Single</string>
-    <string name="artist_release_ep">EP</string>
-    <string name="artist_release_compilation">Compilation</string>
-    <string name="artist_release_unknown">Release</string>
     <string name="artist_error_network">Unable to reach Nhajc. Please try again.</string>
     <string name="artist_error_not_found">This artist is no longer available.</string>
     <string name="artist_error_forbidden">You do not have permission to view this artist.</string>

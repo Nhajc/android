@@ -12,6 +12,30 @@ import com.nhajc.android.data.model.ArtistSort
 import com.nhajc.android.data.model.DownloadSort
 import com.nhajc.android.data.model.LibrarySort
 
+private const val FAVORITES_QUERY = """
+    SELECT * FROM Songs
+    WHERE favoritedAt IS NOT NULL
+      AND (:query IS NULL OR instr(searchTitle, :query) > 0)
+      AND (:sort != 'DOWNLOADED' OR downloadedAt IS NOT NULL)
+    ORDER BY
+      CASE WHEN :sort = 'RECENT' THEN favoritedAt END DESC,
+      CASE WHEN :sort = 'DOWNLOADED' THEN downloadedAt END DESC,
+      CASE WHEN :sort = 'ARTIST' THEN (SELECT a.searchName FROM SongArtists sa JOIN Artists a ON a.id = sa.artistId WHERE sa.songId = Songs.id AND sa.position = 0) END,
+      searchTitle,
+      id
+    """
+
+private const val DOWNLOADS_QUERY = """
+    SELECT * FROM Songs
+    WHERE fileQuality IS NOT NULL
+      AND (:query IS NULL OR instr(searchTitle, :query) > 0)
+    ORDER BY
+      CASE WHEN :sort = 'RECENT' THEN downloadedAt END DESC,
+      CASE WHEN :sort = 'ARTIST' THEN (SELECT a.searchName FROM SongArtists sa JOIN Artists a ON a.id = sa.artistId WHERE sa.songId = Songs.id AND sa.position = 0) END,
+      searchTitle,
+      id
+    """
+
 @Dao
 interface LibraryDao {
     @Transaction
@@ -62,36 +86,20 @@ interface LibraryDao {
     fun artists(query: String?, sort: ArtistSort): PagingSource<Int, ArtistEntity>
 
     @Transaction
-    @Query(
-        """
-        SELECT * FROM Songs
-        WHERE favoritedAt IS NOT NULL
-          AND (:query IS NULL OR instr(searchTitle, :query) > 0)
-          AND (:sort != 'DOWNLOADED' OR downloadedAt IS NOT NULL)
-        ORDER BY
-          CASE WHEN :sort = 'RECENT' THEN favoritedAt END DESC,
-          CASE WHEN :sort = 'DOWNLOADED' THEN downloadedAt END DESC,
-          CASE WHEN :sort = 'ARTIST' THEN (SELECT a.searchName FROM SongArtists sa JOIN Artists a ON a.id = sa.artistId WHERE sa.songId = Songs.id AND sa.position = 0) END,
-          searchTitle,
-          id
-        """
-    )
+    @Query(FAVORITES_QUERY)
     fun songs(query: String?, sort: LibrarySort): PagingSource<Int, SongWithArtists>
 
     @Transaction
-    @Query(
-        """
-        SELECT * FROM Songs
-        WHERE fileQuality IS NOT NULL
-          AND (:query IS NULL OR instr(searchTitle, :query) > 0)
-        ORDER BY
-          CASE WHEN :sort = 'RECENT' THEN downloadedAt END DESC,
-          CASE WHEN :sort = 'ARTIST' THEN (SELECT a.searchName FROM SongArtists sa JOIN Artists a ON a.id = sa.artistId WHERE sa.songId = Songs.id AND sa.position = 0) END,
-          searchTitle,
-          id
-        """
-    )
+    @Query(FAVORITES_QUERY)
+    suspend fun songList(query: String?, sort: LibrarySort): List<SongWithArtists>
+
+    @Transaction
+    @Query(DOWNLOADS_QUERY)
     fun downloads(query: String?, sort: DownloadSort): PagingSource<Int, SongWithArtists>
+
+    @Transaction
+    @Query(DOWNLOADS_QUERY)
+    suspend fun downloadList(query: String?, sort: DownloadSort): List<SongWithArtists>
 
     @Query("DELETE FROM Playlists WHERE lastActivityAt IS NULL AND downloadedAt IS NULL")
     suspend fun deleteUnusedPlaylists()

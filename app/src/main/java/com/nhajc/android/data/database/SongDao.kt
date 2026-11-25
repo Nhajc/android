@@ -2,6 +2,7 @@ package com.nhajc.android.data.database
 
 import androidx.room3.Dao
 import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Upsert
@@ -9,13 +10,25 @@ import com.nhajc.android.data.database.model.DownloadChoice
 import com.nhajc.android.data.database.model.SongArtistCrossRef
 import com.nhajc.android.data.database.model.SongEntity
 import com.nhajc.android.data.database.model.SongInfo
+import com.nhajc.android.data.database.model.SongWithArtists
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SongDao {
     @Upsert(entity = SongEntity::class)
     suspend fun upsertFromServer(songs: List<SongInfo>)
+
+    @Insert(entity = SongEntity::class, onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfMissing(songs: List<SongInfo>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertArtistsIfMissing(artists: List<SongArtistCrossRef>)
+
+    @Transaction
+    @Query("SELECT * FROM Songs WHERE id = :id")
+    fun observe(id: Uuid): Flow<SongWithArtists?>
 
     @Query("UPDATE Songs SET favoritedAt = NULL")
     suspend fun clearFavoritedAt()

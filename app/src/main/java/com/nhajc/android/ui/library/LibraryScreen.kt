@@ -57,6 +57,7 @@ import com.nhajc.android.ui.common.SearchTopBar
 import com.nhajc.android.ui.common.SortButton
 import com.nhajc.android.ui.common.UserAvatarButton
 import com.nhajc.android.ui.common.ViewStyleButton
+import com.nhajc.android.ui.common.label
 import com.nhajc.android.ui.common.message
 import com.nhajc.android.ui.theme.NhajcTheme
 import kotlin.uuid.Uuid
@@ -67,6 +68,7 @@ import kotlinx.datetime.LocalDate
 fun LibraryScreen(
     onOpenSettings: () -> Unit,
     onOpenDownloads: () -> Unit,
+    onOpenArtist: (Uuid) -> Unit,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -94,8 +96,10 @@ fun LibraryScreen(
         onNewPlaylistOpen = viewModel::onNewPlaylistOpen,
         onNewPlaylistDismiss = viewModel::onNewPlaylistDismiss,
         onCreatePlaylist = viewModel::onCreatePlaylist,
+        onFavoriteClick = viewModel::onFavoriteClick,
         onOpenSettings = onOpenSettings,
-        onOpenDownloads = onOpenDownloads
+        onOpenDownloads = onOpenDownloads,
+        onOpenArtist = onOpenArtist
     )
 }
 
@@ -119,8 +123,10 @@ internal fun LibraryScreen(
     onNewPlaylistOpen: () -> Unit,
     onNewPlaylistDismiss: () -> Unit,
     onCreatePlaylist: (String) -> Unit,
+    onFavoriteClick: (index: Int) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenDownloads: () -> Unit,
+    onOpenArtist: (Uuid) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val settings = uiState.settings
@@ -195,7 +201,15 @@ internal fun LibraryScreen(
                     releases = releases,
                     playlists = playlists,
                     artists = artists,
-                    favorites = favorites
+                    favorites = favorites,
+                    onFavoriteClick = onFavoriteClick,
+                    onArtistClick = { index ->
+                        val artist = artists.peek(index)
+
+                        if (artist != null) {
+                            onOpenArtist(artist.id)
+                        }
+                    }
                 )
             }
         }
@@ -277,7 +291,9 @@ private fun LibraryContent(
     releases: LazyPagingItems<Release>,
     playlists: LazyPagingItems<Playlist>,
     artists: LazyPagingItems<ArtistSummary>,
-    favorites: LazyPagingItems<Song>
+    favorites: LazyPagingItems<Song>,
+    onFavoriteClick: (index: Int) -> Unit,
+    onArtistClick: (index: Int) -> Unit
 ) {
     val view = uiState.settings.view
     val isFiltered = uiState.query.isNotBlank()
@@ -288,7 +304,9 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_releases),
             key = { it.id.toString() },
-            entry = { release -> release.entry() }
+            entry = { release -> release.entry() },
+            // TODO: open the release screen once it exists
+            onItemClick = {}
         )
 
         LibraryTab.PLAYLISTS -> PagedMediaItems(
@@ -296,7 +314,9 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_playlists),
             key = { it.id.toString() },
-            entry = { playlist -> playlist.entry() }
+            entry = { playlist -> playlist.entry() },
+            // TODO: open the playlist screen once it exists
+            onItemClick = {}
         )
 
         LibraryTab.ARTISTS -> PagedMediaItems(
@@ -304,7 +324,8 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_artists),
             key = { it.id.toString() },
-            entry = { artist -> artist.entry() }
+            entry = { artist -> artist.entry() },
+            onItemClick = onArtistClick
         )
 
         LibraryTab.FAVORITES -> PagedMediaItems(
@@ -312,7 +333,8 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_favorites),
             key = { it.id.toString() },
-            entry = { song -> song.entry() }
+            entry = { song -> song.entry() },
+            onItemClick = onFavoriteClick
         )
     }
 }
@@ -369,15 +391,6 @@ private fun ArtistSort.label(): Int = when (this) {
     ArtistSort.NAME -> R.string.sort_name
 }
 
-@StringRes
-private fun ReleaseType.label(): Int = when (this) {
-    ReleaseType.ALBUM -> R.string.release_type_album
-    ReleaseType.SINGLE -> R.string.release_type_single
-    ReleaseType.EP -> R.string.release_type_ep
-    ReleaseType.COMPILATION -> R.string.release_type_compilation
-    ReleaseType.UNKNOWN -> R.string.release_type_unknown
-}
-
 @Preview(name = "Library Light", uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "Library Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -420,8 +433,10 @@ private fun LibraryScreenPreview() {
             onNewPlaylistOpen = {},
             onNewPlaylistDismiss = {},
             onCreatePlaylist = {},
+            onFavoriteClick = {},
             onOpenSettings = {},
-            onOpenDownloads = {}
+            onOpenDownloads = {},
+            onOpenArtist = {}
         )
     }
 }

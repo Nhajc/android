@@ -1,6 +1,8 @@
 package com.nhajc.android.data.database
 
 import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Upsert
 import com.nhajc.android.data.database.model.ArtistEntity
@@ -11,6 +13,9 @@ import kotlin.uuid.Uuid
 interface ArtistDao {
     @Upsert
     suspend fun upsert(artists: List<ArtistEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfMissing(artists: List<ArtistEntity>)
 
     @Query("UPDATE Artists SET followedAt = NULL")
     suspend fun clearFollowedAt()
