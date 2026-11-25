@@ -373,14 +373,11 @@ private fun Release.entry(): MediaEntry {
     return MediaEntry(title, subtitle, coverUrl, Icons.Outlined.Album)
 }
 
-private fun Playlist.entry() =
-    MediaEntry(title, owner.username, coverUrl, Icons.AutoMirrored.Outlined.QueueMusic)
+private fun Playlist.entry() = MediaEntry(title, owner.username, coverUrl, Icons.AutoMirrored.Outlined.QueueMusic)
 
-private fun ArtistSummary.entry() =
-    MediaEntry(name, null, avatarUrl, Icons.Outlined.Person, isRound = true)
+private fun ArtistSummary.entry() = MediaEntry(name, null, avatarUrl, Icons.Outlined.Person, isRound = true)
 
-private fun Song.entry() =
-    MediaEntry(title, artists.joinToString(", ") { it.name }, coverUrl, Icons.Outlined.MusicNote)
+private fun Song.entry() = MediaEntry(title, artists.joinToString(", ") { it.name }, coverUrl, Icons.Outlined.MusicNote)
 
 @Composable
 private fun emptyText(isFiltered: Boolean, @StringRes empty: Int): String = if (isFiltered) {

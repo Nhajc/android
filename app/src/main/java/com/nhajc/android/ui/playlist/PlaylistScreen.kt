@@ -344,12 +344,7 @@ private fun PlaylistMenuButton(isOwned: Boolean, onDeleteClick: () -> Unit) {
 }
 
 @Composable
-private fun DeletePlaylistDialog(
-    title: String,
-    isDeleting: Boolean,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
+private fun DeletePlaylistDialog(title: String, isDeleting: Boolean, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.delete_playlist)) },

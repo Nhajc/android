@@ -9,9 +9,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SearchPlaybackViewModel @Inject constructor(
-    private val playbackController: PlaybackController
-) : ViewModel() {
+class SearchPlaybackViewModel @Inject constructor(private val playbackController: PlaybackController) : ViewModel() {
     fun play(songs: List<Song>, startIndex: Int) {
         viewModelScope.launch { playbackController.play(songs, startIndex) }
     }

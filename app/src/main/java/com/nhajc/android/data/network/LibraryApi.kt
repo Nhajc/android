@@ -15,34 +15,19 @@ import retrofit2.http.Query
 
 interface LibraryApi {
     @GET("library")
-    suspend fun getLibrary(
-        @Query("page") page: Int,
-        @Query("size") size: Int
-    ): PageResponse<LibraryItemResponse>
+    suspend fun getLibrary(@Query("page") page: Int, @Query("size") size: Int): PageResponse<LibraryItemResponse>
 
     @GET("library/releases")
-    suspend fun getReleases(
-        @Query("page") page: Int,
-        @Query("size") size: Int
-    ): PageResponse<ReleaseSummaryResponse>
+    suspend fun getReleases(@Query("page") page: Int, @Query("size") size: Int): PageResponse<ReleaseSummaryResponse>
 
     @GET("library/playlists")
-    suspend fun getPlaylists(
-        @Query("page") page: Int,
-        @Query("size") size: Int
-    ): PageResponse<PlaylistSummaryResponse>
+    suspend fun getPlaylists(@Query("page") page: Int, @Query("size") size: Int): PageResponse<PlaylistSummaryResponse>
 
     @GET("library/artists")
-    suspend fun getArtists(
-        @Query("page") page: Int,
-        @Query("size") size: Int
-    ): PageResponse<ArtistSummaryResponse>
+    suspend fun getArtists(@Query("page") page: Int, @Query("size") size: Int): PageResponse<ArtistSummaryResponse>
 
     @GET("library/songs")
-    suspend fun getSongs(
-        @Query("page") page: Int,
-        @Query("size") size: Int
-    ): PageResponse<SongResponse>
+    suspend fun getSongs(@Query("page") page: Int, @Query("size") size: Int): PageResponse<SongResponse>
 
     @PUT("library/releases/{id}")
     suspend fun saveRelease(@Path("id") id: Uuid)

@@ -58,11 +58,7 @@ import com.nhajc.android.data.model.AppError
 import com.nhajc.android.ui.theme.NhajcTheme
 
 @Composable
-internal fun AuthContainer(
-    title: String,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
-) {
+internal fun AuthContainer(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Surface(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier

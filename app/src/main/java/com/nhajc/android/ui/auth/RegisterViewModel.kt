@@ -13,8 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor(private val userRepository: UserRepository) :
-    ViewModel() {
+class RegisterViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 

@@ -10,12 +10,8 @@ data class ArtistRequest(val name: String)
 
 @Serializable
 @SerialName("ARTIST")
-data class ArtistSummaryResponse(
-    val id: Uuid,
-    val name: String,
-    val avatarUrl: String?,
-    val followedAt: Instant?
-) : SearchItemResponse
+data class ArtistSummaryResponse(val id: Uuid, val name: String, val avatarUrl: String?, val followedAt: Instant?) :
+    SearchItemResponse
 
 @Serializable
 data class ArtistResponse(

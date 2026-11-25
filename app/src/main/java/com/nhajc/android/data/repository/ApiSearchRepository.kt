@@ -27,7 +27,9 @@ class ApiSearchRepository(private val api: SearchApi) : SearchRepository {
         if (categories.isEmpty()) {
             val response = api.search(keyword, page, size)
             return@repositoryCall SearchPageViewModel(
-                response.content.mapNotNull { it.toViewModel() }, response.page, response.hasNext
+                response.content.mapNotNull { it.toViewModel() },
+                response.page,
+                response.hasNext
             )
         }
         // Each selected category advances one backend page at a time. Keep every
@@ -42,7 +44,9 @@ class ApiSearchRepository(private val api: SearchApi) : SearchRepository {
                         SearchCategory.ARTIST -> api.searchArtists(keyword, page, size)
                     }
                     SearchPageViewModel(
-                        response.content.mapNotNull { it.toViewModel() }, response.page, response.hasNext
+                        response.content.mapNotNull { it.toViewModel() },
+                        response.page,
+                        response.hasNext
                     )
                 }
             }.awaitAll()
@@ -57,9 +61,13 @@ class ApiSearchRepository(private val api: SearchApi) : SearchRepository {
 
 private fun SearchItemResponse.toViewModel(): SearchItemViewModel? = when (this) {
     is SongResponse -> SearchItemViewModel(
-        id = id.toString(), category = SearchCategory.SONG, title = title,
-        imageUrl = coverUrl, artists = artists.map { it.name },
-        releaseTitle = releaseTitle, durationSeconds = durationSeconds,
+        id = id.toString(),
+        category = SearchCategory.SONG,
+        title = title,
+        imageUrl = coverUrl,
+        artists = artists.map { it.name },
+        releaseTitle = releaseTitle,
+        durationSeconds = durationSeconds,
         song = Song(
             id = id, title = title, trackNumber = trackNumber, durationSeconds = durationSeconds,
             artists = artists.map { ArtistSummary(it.id, it.name, it.avatarUrl) },
@@ -67,16 +75,31 @@ private fun SearchItemResponse.toViewModel(): SearchItemViewModel? = when (this)
             isFavorite = favoritedAt != null
         )
     )
+
     is ReleaseSummaryResponse -> SearchItemViewModel(
-        id = id.toString(), category = SearchCategory.RELEASE, title = title,
-        imageUrl = coverUrl, artists = artists.map { it.name }, songCount = songCount
+        id = id.toString(),
+        category = SearchCategory.RELEASE,
+        title = title,
+        imageUrl = coverUrl,
+        artists = artists.map { it.name },
+        songCount = songCount
     )
+
     is PlaylistSummaryResponse -> SearchItemViewModel(
-        id = id.toString(), category = SearchCategory.PLAYLIST, title = title,
-        imageUrl = coverUrl, ownerName = owner.username, songCount = songCount
+        id = id.toString(),
+        category = SearchCategory.PLAYLIST,
+        title = title,
+        imageUrl = coverUrl,
+        ownerName = owner.username,
+        songCount = songCount
     )
+
     is ArtistSummaryResponse -> SearchItemViewModel(
-        id = id.toString(), category = SearchCategory.ARTIST, title = name, imageUrl = avatarUrl
+        id = id.toString(),
+        category = SearchCategory.ARTIST,
+        title = name,
+        imageUrl = avatarUrl
     )
+
     UnknownItem -> null
 }

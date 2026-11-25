@@ -37,8 +37,7 @@ class PlaylistRepository @Inject constructor(
 
     fun playlist(id: Uuid): Flow<Playlist?> = playlistDao.observe(id).map { it?.asModel() }
 
-    fun songs(id: Uuid): Flow<List<Song>> =
-        playlistDao.observeSongs(id).map { songs -> songs.map { it.asModel() } }
+    fun songs(id: Uuid): Flow<List<Song>> = playlistDao.observeSongs(id).map { songs -> songs.map { it.asModel() } }
 
     fun ownedPlaylists(ownerId: Uuid): Flow<List<Playlist>> =
         playlistDao.observeOwned(ownerId).map { playlists -> playlists.map { it.asModel() } }

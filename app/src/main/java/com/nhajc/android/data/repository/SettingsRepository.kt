@@ -128,7 +128,5 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     }
 }
 
-private inline fun <reified T : Enum<T>> Preferences.enumValue(
-    key: Preferences.Key<String>,
-    default: T
-): T = enumValues<T>().firstOrNull { it.name == this[key] } ?: default
+private inline fun <reified T : Enum<T>> Preferences.enumValue(key: Preferences.Key<String>, default: T): T =
+    enumValues<T>().firstOrNull { it.name == this[key] } ?: default

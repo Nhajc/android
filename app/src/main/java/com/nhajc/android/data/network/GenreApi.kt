@@ -7,8 +7,5 @@ import retrofit2.http.Query
 
 interface GenreApi {
     @GET("genres")
-    suspend fun getGenres(
-        @Query("page") page: Int,
-        @Query("size") size: Int
-    ): PageResponse<GenreResponse>
+    suspend fun getGenres(@Query("page") page: Int, @Query("size") size: Int): PageResponse<GenreResponse>
 }

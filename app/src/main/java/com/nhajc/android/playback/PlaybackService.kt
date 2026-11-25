@@ -65,8 +65,7 @@ class PlaybackService : MediaLibraryService() {
         session = MediaLibrarySession.Builder(this, player, SessionCallback()).build()
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
-        session
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = session
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         val player = session?.player

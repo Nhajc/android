@@ -15,5 +15,4 @@ data class ArtistEntity(
     val followedAt: Instant?
 )
 
-fun ArtistEntity.asModel(): ArtistSummary =
-    ArtistSummary(id = id, name = name, avatarUrl = avatarUrl)
+fun ArtistEntity.asModel(): ArtistSummary = ArtistSummary(id = id, name = name, avatarUrl = avatarUrl)

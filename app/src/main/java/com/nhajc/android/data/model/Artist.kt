@@ -31,5 +31,4 @@ enum class ArtistError {
     SERVER
 }
 
-class ArtistException(val error: ArtistError, cause: Throwable? = null) :
-    Exception(error.name, cause)
+class ArtistException(val error: ArtistError, cause: Throwable? = null) : Exception(error.name, cause)

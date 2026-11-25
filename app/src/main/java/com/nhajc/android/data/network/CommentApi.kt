@@ -27,16 +27,10 @@ interface CommentApi {
     ): PageResponse<CommentResponse>
 
     @POST("songs/{id}/comments")
-    suspend fun createComment(
-        @Path("id") songId: Uuid,
-        @Body request: CommentRequest
-    ): CommentResponse
+    suspend fun createComment(@Path("id") songId: Uuid, @Body request: CommentRequest): CommentResponse
 
     @POST("comments/{id}/replies")
-    suspend fun createReply(
-        @Path("id") commentId: Uuid,
-        @Body request: CommentRequest
-    ): CommentResponse
+    suspend fun createReply(@Path("id") commentId: Uuid, @Body request: CommentRequest): CommentResponse
 
     @DELETE("comments/{id}")
     suspend fun deleteComment(@Path("id") id: Uuid)

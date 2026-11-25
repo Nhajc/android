@@ -1,0 +1,6 @@
+[*.{kt,kts}]
+ktlint_code_style = android_studio
+max_line_length = 120
+ktlint_function_naming_ignore_when_annotated_with = Composable
+ktlint_standard_blank-line-before-declaration = enabled
+ktlint_standard_filename = disabled

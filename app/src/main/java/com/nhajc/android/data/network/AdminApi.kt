@@ -33,10 +33,7 @@ interface AdminApi {
 
     @Multipart
     @POST("admin/artists")
-    suspend fun createArtist(
-        @Part("data") request: ArtistRequest,
-        @Part avatar: MultipartBody.Part?
-    ): IdResponse
+    suspend fun createArtist(@Part("data") request: ArtistRequest, @Part avatar: MultipartBody.Part?): IdResponse
 
     @POST("admin/genres")
     suspend fun createGenre(@Body request: GenreRequest): IdResponse
@@ -50,10 +47,7 @@ interface AdminApi {
 
     @Multipart
     @POST("admin/releases")
-    suspend fun createRelease(
-        @Part("data") request: ReleaseRequest,
-        @Part cover: MultipartBody.Part?
-    ): IdResponse
+    suspend fun createRelease(@Part("data") request: ReleaseRequest, @Part cover: MultipartBody.Part?): IdResponse
 
     @PUT("admin/releases/{id}/songs/order")
     suspend fun reorderSongs(@Path("id") id: Uuid, @Body request: ReorderSongsRequest)
@@ -68,10 +62,7 @@ interface AdminApi {
 
     @Multipart
     @POST("admin/releases/{id}/song-uploads")
-    suspend fun stageSong(
-        @Path("id") releaseId: Uuid,
-        @Part audio: MultipartBody.Part
-    ): StagedSongResponse
+    suspend fun stageSong(@Path("id") releaseId: Uuid, @Part audio: MultipartBody.Part): StagedSongResponse
 
     @PUT("admin/releases/{id}/song-uploads")
     suspend fun saveUploads(@Path("id") releaseId: Uuid, @Body request: SaveUploadedSongsRequest)

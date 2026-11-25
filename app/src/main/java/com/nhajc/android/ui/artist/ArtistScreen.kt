@@ -302,15 +302,13 @@ private fun ArtistReleaseItem(release: ArtistRelease, onClick: () -> Unit) {
 }
 
 @StringRes
-private fun artistErrorMessage(error: ArtistError?): Int {
-    return when (error) {
-        ArtistError.NETWORK -> R.string.artist_error_network
-        ArtistError.SESSION_ENDED -> R.string.error_session_ended
-        ArtistError.NOT_FOUND -> R.string.artist_error_not_found
-        ArtistError.FORBIDDEN -> R.string.artist_error_forbidden
-        ArtistError.INVALID_RESPONSE -> R.string.artist_error_response
-        ArtistError.SERVER, null -> R.string.error_server
-    }
+private fun artistErrorMessage(error: ArtistError?): Int = when (error) {
+    ArtistError.NETWORK -> R.string.artist_error_network
+    ArtistError.SESSION_ENDED -> R.string.error_session_ended
+    ArtistError.NOT_FOUND -> R.string.artist_error_not_found
+    ArtistError.FORBIDDEN -> R.string.artist_error_forbidden
+    ArtistError.INVALID_RESPONSE -> R.string.artist_error_response
+    ArtistError.SERVER, null -> R.string.error_server
 }
 
 @Preview(name = "Artist Light", uiMode = Configuration.UI_MODE_NIGHT_NO)

@@ -143,10 +143,7 @@ fun AuthNavigation() {
 }
 
 @Composable
-fun MainNavigation(
-    searchRepository: SearchRepository,
-    viewModel: MainNavigationViewModel = hiltViewModel()
-) {
+fun MainNavigation(searchRepository: SearchRepository, viewModel: MainNavigationViewModel = hiltViewModel()) {
     val isAdmin by viewModel.isAdmin.collectAsStateWithLifecycle()
     MainNavigationContent(searchRepository, isAdmin)
 }

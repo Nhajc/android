@@ -37,8 +37,7 @@ class ReleaseRepository @Inject constructor(
 
     fun release(id: Uuid): Flow<Release?> = releaseDao.observe(id).map { it?.asModel() }
 
-    fun songs(id: Uuid): Flow<List<Song>> =
-        releaseDao.observeSongs(id).map { songs -> songs.map { it.asModel() } }
+    fun songs(id: Uuid): Flow<List<Song>> = releaseDao.observeSongs(id).map { songs -> songs.map { it.asModel() } }
 
     suspend fun refresh(id: Uuid) {
         val release = call { releaseApi.getRelease(id) }

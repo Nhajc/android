@@ -40,11 +40,15 @@ private const val DOWNLOADS_QUERY = """
 @Dao
 interface LibraryDao {
     @Transaction
-    @Query("SELECT * FROM Releases WHERE lastActivityAt IS NOT NULL ORDER BY lastActivityAt DESC, searchTitle, id LIMIT :limit")
+    @Query(
+        "SELECT * FROM Releases WHERE lastActivityAt IS NOT NULL ORDER BY lastActivityAt DESC, searchTitle, id LIMIT :limit"
+    )
     fun homeReleases(limit: Int): Flow<List<ReleaseWithArtists>>
 
     @Transaction
-    @Query("SELECT * FROM Playlists WHERE lastActivityAt IS NOT NULL ORDER BY lastActivityAt DESC, searchTitle, id LIMIT :limit")
+    @Query(
+        "SELECT * FROM Playlists WHERE lastActivityAt IS NOT NULL ORDER BY lastActivityAt DESC, searchTitle, id LIMIT :limit"
+    )
     fun homePlaylists(limit: Int): Flow<List<PlaylistWithOwner>>
 
     @Query("SELECT * FROM Artists WHERE followedAt IS NOT NULL ORDER BY followedAt DESC, searchName, id LIMIT :limit")
