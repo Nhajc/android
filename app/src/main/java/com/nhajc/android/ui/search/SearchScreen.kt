@@ -74,7 +74,8 @@ fun SearchScreen(
     onLoadMore: () -> Unit,
     onSongClick: (SearchItemViewModel) -> Unit = {},
     onArtistClick: (SearchItemViewModel) -> Unit = {},
-    onReleaseClick: (SearchItemViewModel) -> Unit = {}
+    onReleaseClick: (SearchItemViewModel) -> Unit = {},
+    onPlaylistClick: (SearchItemViewModel) -> Unit = {}
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     Scaffold(modifier = Modifier.fillMaxSize().imePadding()) { padding ->
@@ -142,12 +143,12 @@ fun SearchScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Spacer(Modifier.height(8.dp))
                             }
-                            // TODO: open playlist rows once the playlist screen exists
                             items(model.items, key = { "${it.category}:${it.id}" }) { item ->
                                 SearchResultRow(item, onClick = {
                                     when (item.category) {
                                         SearchCategory.ARTIST -> onArtistClick(item)
                                         SearchCategory.RELEASE -> onReleaseClick(item)
+                                        SearchCategory.PLAYLIST -> onPlaylistClick(item)
                                         else -> onSongClick(item)
                                     }
                                 })
@@ -205,8 +206,7 @@ private fun SearchWelcome() {
 private fun SearchResultRow(item: SearchItemViewModel, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-            .clickable(enabled = item.song != null || item.category == SearchCategory.ARTIST ||
-                item.category == SearchCategory.RELEASE, onClick = onClick)
+            .clickable(enabled = item.song != null || item.category != SearchCategory.SONG, onClick = onClick)
             .background(MaterialTheme.colorScheme.surfaceContainerLow).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)

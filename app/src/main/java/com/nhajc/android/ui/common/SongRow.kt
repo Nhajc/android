@@ -25,6 +25,7 @@ fun SongRow(
     showCover: Boolean,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
+    onAddToPlaylistClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ListItem(
@@ -71,7 +72,8 @@ fun SongRow(
                 SongMenuButton(
                     isFavorite = song.isFavorite,
                     isFavoriteEnabled = true,
-                    onFavoriteClick = onFavoriteClick
+                    onFavoriteClick = onFavoriteClick,
+                    onAddToPlaylistClick = onAddToPlaylistClick
                 )
             }
         }

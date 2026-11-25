@@ -55,6 +55,7 @@ import com.nhajc.android.ui.common.SaveButton
 import com.nhajc.android.ui.common.SongRow
 import com.nhajc.android.ui.common.label
 import com.nhajc.android.ui.common.message
+import com.nhajc.android.ui.playlist.AddToPlaylistSheet
 import com.nhajc.android.ui.theme.NhajcTheme
 import kotlin.uuid.Uuid
 import kotlinx.datetime.LocalDate
@@ -101,6 +102,7 @@ internal fun ReleaseScreen(
 ) {
     val release = uiState.release
     val snackbarHostState = remember { SnackbarHostState() }
+    var addingSong by remember { mutableStateOf<Song?>(null) }
 
     val errorMessage = uiState.error?.let { stringResource(it.message()) }
 
@@ -149,6 +151,7 @@ internal fun ReleaseScreen(
                 onSaveClick = onSaveClick,
                 onSongClick = onSongClick,
                 onFavoriteClick = onFavoriteClick,
+                onAddToPlaylistClick = { song -> addingSong = song },
                 modifier = contentModifier
             )
 
@@ -169,6 +172,12 @@ internal fun ReleaseScreen(
             }
         }
     }
+
+    AddToPlaylistSheet(
+        song = addingSong,
+        snackbarHostState = snackbarHostState,
+        onDismiss = { addingSong = null }
+    )
 }
 
 @Composable
@@ -182,6 +191,7 @@ private fun ReleaseContent(
     onSaveClick: () -> Unit,
     onSongClick: (index: Int) -> Unit,
     onFavoriteClick: (Song) -> Unit,
+    onAddToPlaylistClick: (Song) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val subtitle = stringResource(
@@ -217,7 +227,7 @@ private fun ReleaseContent(
         if (songs.isEmpty()) {
             item {
                 Text(
-                    text = stringResource(R.string.release_no_songs),
+                    text = stringResource(R.string.no_songs),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(32.dp),
@@ -233,7 +243,8 @@ private fun ReleaseContent(
                 song = song,
                 showCover = false,
                 onClick = { onSongClick(index) },
-                onFavoriteClick = { onFavoriteClick(song) }
+                onFavoriteClick = { onFavoriteClick(song) },
+                onAddToPlaylistClick = { onAddToPlaylistClick(song) }
             )
         }
     }

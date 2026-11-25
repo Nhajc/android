@@ -25,11 +25,8 @@ import com.nhajc.android.data.model.Playlist
 import com.nhajc.android.data.model.Release
 import com.nhajc.android.data.model.Song
 import com.nhajc.android.data.network.LibraryApi
-import com.nhajc.android.data.network.PlaylistApi
 import com.nhajc.android.data.network.model.ArtistSummaryResponse
 import com.nhajc.android.data.network.model.PageResponse
-import com.nhajc.android.data.network.model.PlaylistRequest
-import com.nhajc.android.data.network.model.PlaylistResponse
 import com.nhajc.android.data.network.model.PlaylistSummaryResponse
 import com.nhajc.android.data.network.model.ReleaseSummaryResponse
 import com.nhajc.android.data.network.model.SongResponse
@@ -51,7 +48,6 @@ private const val MIN_QUERY_LENGTH = 3
 @Singleton
 class LibraryRepository @Inject constructor(
     private val libraryApi: LibraryApi,
-    private val playlistApi: PlaylistApi,
     private val database: AppDatabase
 ) {
     private val libraryDao = database.libraryDao()
@@ -103,16 +99,6 @@ class LibraryRepository @Inject constructor(
         }
 
         songDao.setFavoritedAt(songId, favoritedAt)
-    }
-
-    suspend fun createPlaylist(title: String) {
-        val request = PlaylistRequest(title = title, isPrivate = false, songIds = emptyList())
-        val playlist = call { playlistApi.createPlaylist(request, null) }
-
-        database.withWriteTransaction {
-            userDao.upsert(listOf(playlist.owner.asEntity()))
-            playlistDao.upsertFromServer(listOf(playlist.asInfo()))
-        }
     }
 
     suspend fun sync() {
@@ -195,7 +181,6 @@ class LibraryRepository @Inject constructor(
             val error = when (exception.code()) {
                 400 -> AppError.INVALID_INPUT
                 401 -> AppError.SESSION_ENDED
-                409 -> AppError.PLAYLIST_LIMIT
                 else -> AppError.SERVER
             }
 
@@ -218,7 +203,7 @@ private fun searchKey(query: String): String? {
 
 internal fun searchText(text: String): String = StringUtils.stripAccents(text).lowercase()
 
-private fun UserSummaryResponse.asEntity() =
+internal fun UserSummaryResponse.asEntity() =
     UserEntity(id = id, username = username, avatarUrl = avatarUrl)
 
 internal fun ArtistSummaryResponse.asEntity() = ArtistEntity(
@@ -249,17 +234,7 @@ private fun PlaylistSummaryResponse.asInfo() = PlaylistInfo(
     lastActivityAt = lastActivityAt
 )
 
-private fun PlaylistResponse.asInfo() = PlaylistInfo(
-    id = id,
-    title = title,
-    searchTitle = searchText(title),
-    ownerId = owner.id,
-    isPrivate = isPrivate,
-    coverUrl = coverUrl,
-    lastActivityAt = lastActivityAt
-)
-
-private fun SongResponse.asInfo() = SongInfo(
+internal fun SongResponse.asInfo() = SongInfo(
     id = id,
     releaseId = releaseId,
     releaseTitle = releaseTitle,

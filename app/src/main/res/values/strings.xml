@@ -51,6 +51,7 @@
     <string name="error_network">Can\'t reach Nhajc. Try again.</string>
     <string name="error_server">Nhajc is having problems. Try again later.</string>
     <string name="error_playlist_limit">You can have up to 200 playlists.</string>
+    <string name="error_playlist_full">A playlist can have up to 1000 songs.</string>
     <string name="error_not_found">This is no longer available.</string>
     <string name="try_again">Try again</string>
     <string name="close_search">Close search</string>
@@ -95,7 +96,17 @@
     <string name="save_to_library">Save to library</string>
     <string name="remove_from_library">Remove from library</string>
     <string name="release_subtitle">%1$s · %2$d</string>
-    <string name="release_no_songs">No songs yet.</string>
+    <string name="no_songs">No songs yet.</string>
+    <string name="added_to_playlist">Added to %1$s</string>
+    <string name="edit_playlist">Edit playlist</string>
+    <string name="delete_playlist">Delete playlist</string>
+    <string name="delete_playlist_message">Delete "%1$s"? This can\'t be undone.</string>
+    <string name="delete">Delete</string>
+    <string name="private_playlist">Private</string>
+    <plurals name="playlist_subtitle">
+        <item quantity="one">Playlist · %d song</item>
+        <item quantity="other">Playlist · %d songs</item>
+    </plurals>
     <string name="artist_title">Artist</string>
     <string name="artist_loading">Loading artist…</string>
     <string name="artist_retry">Try again</string>

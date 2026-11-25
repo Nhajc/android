@@ -74,5 +74,6 @@ fun PlaylistWithOwner.asModel(): Playlist = Playlist(
     title = playlist.info.title,
     coverUrl = playlist.info.coverUrl,
     isPrivate = playlist.info.isPrivate,
-    owner = owner.asModel()
+    owner = owner.asModel(),
+    isSaved = playlist.info.lastActivityAt != null
 )

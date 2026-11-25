@@ -70,6 +70,7 @@ fun LibraryScreen(
     onOpenDownloads: () -> Unit,
     onOpenArtist: (Uuid) -> Unit,
     onOpenRelease: (Uuid) -> Unit,
+    onOpenPlaylist: (Uuid) -> Unit,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -101,7 +102,8 @@ fun LibraryScreen(
         onOpenSettings = onOpenSettings,
         onOpenDownloads = onOpenDownloads,
         onOpenArtist = onOpenArtist,
-        onOpenRelease = onOpenRelease
+        onOpenRelease = onOpenRelease,
+        onOpenPlaylist = onOpenPlaylist
     )
 }
 
@@ -130,6 +132,7 @@ internal fun LibraryScreen(
     onOpenDownloads: () -> Unit,
     onOpenArtist: (Uuid) -> Unit,
     onOpenRelease: (Uuid) -> Unit,
+    onOpenPlaylist: (Uuid) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val settings = uiState.settings
@@ -211,6 +214,13 @@ internal fun LibraryScreen(
 
                         if (release != null) {
                             onOpenRelease(release.id)
+                        }
+                    },
+                    onPlaylistClick = { index ->
+                        val playlist = playlists.peek(index)
+
+                        if (playlist != null) {
+                            onOpenPlaylist(playlist.id)
                         }
                     },
                     onArtistClick = { index ->
@@ -304,6 +314,7 @@ private fun LibraryContent(
     favorites: LazyPagingItems<Song>,
     onFavoriteClick: (index: Int) -> Unit,
     onReleaseClick: (index: Int) -> Unit,
+    onPlaylistClick: (index: Int) -> Unit,
     onArtistClick: (index: Int) -> Unit
 ) {
     val view = uiState.settings.view
@@ -325,8 +336,7 @@ private fun LibraryContent(
             emptyText = emptyText(isFiltered, R.string.empty_playlists),
             key = { it.id.toString() },
             entry = { playlist -> playlist.entry() },
-            // TODO: open the playlist screen once it exists
-            onItemClick = {}
+            onItemClick = onPlaylistClick
         )
 
         LibraryTab.ARTISTS -> PagedMediaItems(
@@ -449,7 +459,8 @@ private fun LibraryScreenPreview() {
             onOpenSettings = {},
             onOpenDownloads = {},
             onOpenArtist = {},
-            onOpenRelease = {}
+            onOpenRelease = {},
+            onOpenPlaylist = {}
         )
     }
 }
