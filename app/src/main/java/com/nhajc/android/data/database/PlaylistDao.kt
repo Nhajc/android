@@ -54,6 +54,14 @@ interface PlaylistDao {
     @Query("UPDATE Playlists SET downloadedAt = :downloadedAt WHERE id = :id")
     suspend fun setDownloadedAt(id: Uuid, downloadedAt: Instant?)
 
+    @Query(
+        """
+        UPDATE Playlists SET downloadedAt = NULL
+        WHERE lastActivityAt IS NULL AND isRemoteRemoved = 0
+        """
+    )
+    suspend fun clearUnsavedDownloads()
+
     @Query("UPDATE Playlists SET isRemoteRemoved = :isRemoteRemoved WHERE id = :id")
     suspend fun setRemoteRemoved(id: Uuid, isRemoteRemoved: Boolean)
 

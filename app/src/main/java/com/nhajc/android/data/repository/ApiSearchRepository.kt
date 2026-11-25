@@ -64,7 +64,7 @@ private fun SearchItemResponse.toViewModel(): SearchItemViewModel? = when (this)
             id = id, title = title, trackNumber = trackNumber, durationSeconds = durationSeconds,
             artists = artists.map { ArtistSummary(it.id, it.name, it.avatarUrl) },
             releaseId = releaseId, releaseTitle = releaseTitle, coverUrl = coverUrl,
-            isFavorite = favoritedAt != null
+            isFavorite = favoritedAt != null, fileQuality = null, isDownloaded = false
         )
     )
     is ReleaseSummaryResponse -> SearchItemViewModel(

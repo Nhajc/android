@@ -89,7 +89,13 @@ class ReleaseRepository @Inject constructor(
             null
         }
 
-        releaseDao.setLastActivityAt(id, lastActivityAt)
+        database.withWriteTransaction {
+            releaseDao.setLastActivityAt(id, lastActivityAt)
+
+            if (!isSaved) {
+                releaseDao.setDownloadedAt(id, null)
+            }
+        }
     }
 
     private suspend fun <T> call(block: suspend () -> T): T {

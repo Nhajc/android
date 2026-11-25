@@ -79,7 +79,13 @@ class PlaylistRepository @Inject constructor(
             null
         }
 
-        playlistDao.setLastActivityAt(id, lastActivityAt)
+        database.withWriteTransaction {
+            playlistDao.setLastActivityAt(id, lastActivityAt)
+
+            if (!isSaved) {
+                playlistDao.setDownloadedAt(id, null)
+            }
+        }
     }
 
     suspend fun delete(id: Uuid) {

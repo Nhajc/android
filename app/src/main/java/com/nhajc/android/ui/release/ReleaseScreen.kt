@@ -299,7 +299,9 @@ private fun ReleaseScreenPreview() {
             releaseId = release.id,
             releaseTitle = release.title,
             coverUrl = null,
-            isFavorite = index == 1
+            isFavorite = index == 1,
+            fileQuality = null,
+            isDownloaded = false
         )
     }
 

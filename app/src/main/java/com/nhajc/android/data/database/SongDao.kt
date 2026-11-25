@@ -9,8 +9,10 @@ import androidx.room3.Upsert
 import com.nhajc.android.data.database.model.DownloadChoice
 import com.nhajc.android.data.database.model.SongArtistCrossRef
 import com.nhajc.android.data.database.model.SongEntity
+import com.nhajc.android.data.database.model.SongFile
 import com.nhajc.android.data.database.model.SongInfo
 import com.nhajc.android.data.database.model.SongWithArtists
+import com.nhajc.android.data.model.AudioQuality
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
@@ -57,20 +59,38 @@ interface SongDao {
     suspend fun replacePlaylistChoices(playlistId: Uuid, from: DownloadChoice, to: DownloadChoice)
 
     @Query(
-        "SELECT id FROM WantedSongs WHERE id IN (SELECT id FROM Songs WHERE fileQuality IS NULL)"
+        """
+        SELECT id, fileQuality FROM Songs
+        WHERE id IN (SELECT id FROM WantedSongs)
+          AND (fileQuality IS NULL OR fileQuality != :quality OR downloadedAt IS NULL)
+        """
     )
-    suspend fun songsToDownload(): List<Uuid>
+    fun observeSongsToDownload(quality: AudioQuality): Flow<List<SongFile>>
 
     @Query(
-        "SELECT id FROM Songs WHERE fileQuality IS NOT NULL AND id NOT IN (SELECT id FROM WantedSongs)"
+        """
+        SELECT id, fileQuality FROM Songs
+        WHERE fileQuality IS NOT NULL AND id NOT IN (SELECT id FROM WantedSongs)
+        """
     )
-    suspend fun songsToRemove(): List<Uuid>
+    fun observeSongsToRemove(): Flow<List<SongFile>>
+
+    @Query("SELECT fileQuality FROM Songs WHERE id = :id")
+    suspend fun fileQuality(id: Uuid): AudioQuality?
 
     @Query("UPDATE Songs SET fileQuality = :quality, downloadedAt = NULL WHERE id = :id")
-    suspend fun setFileStarted(id: Uuid, quality: String)
+    suspend fun setFileStarted(id: Uuid, quality: AudioQuality)
 
-    @Query("UPDATE Songs SET downloadedAt = :downloadedAt WHERE id = :id")
-    suspend fun setDownloadedAt(id: Uuid, downloadedAt: Instant)
+    @Query("UPDATE Songs SET fileQuality = :quality, downloadedAt = :downloadedAt WHERE id = :id")
+    suspend fun setFileDownloaded(id: Uuid, quality: AudioQuality, downloadedAt: Instant)
+
+    @Query(
+        """
+        UPDATE Songs SET fileQuality = NULL
+        WHERE id = :id AND fileQuality = :quality AND downloadedAt IS NULL
+        """
+    )
+    suspend fun clearUnfinishedFile(id: Uuid, quality: AudioQuality)
 
     @Query("UPDATE Songs SET fileQuality = NULL, downloadedAt = NULL WHERE id = :id")
     suspend fun clearFile(id: Uuid)

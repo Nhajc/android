@@ -8,6 +8,7 @@ import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.Junction
 import androidx.room3.Relation
+import com.nhajc.android.data.model.AudioQuality
 import com.nhajc.android.data.model.Song
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -34,7 +35,7 @@ data class SongEntity(
     @ColumnInfo(
         defaultValue = "INHERIT"
     ) val downloadChoice: DownloadChoice = DownloadChoice.INHERIT,
-    val fileQuality: String? = null,
+    val fileQuality: AudioQuality? = null,
     val downloadedAt: Instant? = null
 )
 
@@ -97,6 +98,8 @@ data class SongWithArtists(
 )
 data class WantedSongView(val id: Uuid)
 
+data class SongFile(val id: Uuid, val fileQuality: AudioQuality?)
+
 fun SongWithArtists.asModel(): Song {
     val positions = credits.associate { it.artistId to it.position }
     val sortedArtists = artists.sortedBy { positions[it.id] }
@@ -110,6 +113,8 @@ fun SongWithArtists.asModel(): Song {
         releaseId = song.info.releaseId,
         releaseTitle = song.info.releaseTitle,
         coverUrl = song.info.coverUrl,
-        isFavorite = song.info.favoritedAt != null
+        isFavorite = song.info.favoritedAt != null,
+        fileQuality = song.fileQuality,
+        isDownloaded = song.downloadedAt != null
     )
 }

@@ -36,6 +36,9 @@ interface ReleaseDao {
     @Query("UPDATE Releases SET downloadedAt = :downloadedAt WHERE id = :id")
     suspend fun setDownloadedAt(id: Uuid, downloadedAt: Instant?)
 
+    @Query("UPDATE Releases SET downloadedAt = NULL WHERE lastActivityAt IS NULL")
+    suspend fun clearUnsavedDownloads()
+
     @Query("DELETE FROM ReleaseArtists WHERE releaseId = :releaseId")
     suspend fun deleteArtists(releaseId: Uuid)
 

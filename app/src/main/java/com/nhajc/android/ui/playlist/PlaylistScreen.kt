@@ -392,7 +392,9 @@ private fun PlaylistScreenPreview() {
             releaseId = Uuid.random(),
             releaseTitle = "Glass Antenna",
             coverUrl = null,
-            isFavorite = index == 1
+            isFavorite = index == 1,
+            fileQuality = null,
+            isDownloaded = false
         )
     }
 

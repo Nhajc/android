@@ -11,5 +11,7 @@ data class Song(
     val releaseId: Uuid,
     val releaseTitle: String,
     val coverUrl: String?,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val fileQuality: AudioQuality?,
+    val isDownloaded: Boolean
 )

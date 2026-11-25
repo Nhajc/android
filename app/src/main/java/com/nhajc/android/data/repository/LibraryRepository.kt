@@ -167,6 +167,8 @@ class LibraryRepository @Inject constructor(
                 songDao.replaceArtists(song.id, credits)
             }
 
+            releaseDao.clearUnsavedDownloads()
+            playlistDao.clearUnsavedDownloads()
             libraryDao.deleteUnused()
         }
     }

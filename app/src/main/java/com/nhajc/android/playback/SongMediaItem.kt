@@ -6,6 +6,7 @@ import androidx.media3.common.MediaMetadata
 import com.nhajc.android.BuildConfig
 import com.nhajc.android.data.model.AudioQuality
 import com.nhajc.android.data.model.Song
+import kotlin.uuid.Uuid
 
 fun Song.asMediaItem(quality: AudioQuality): MediaItem {
     val metadata = MediaMetadata.Builder()
@@ -17,11 +18,14 @@ fun Song.asMediaItem(quality: AudioQuality): MediaItem {
         .setIsBrowsable(false)
         .build()
 
-    val audioUrl = "${BuildConfig.BASE_URL}songs/$id/audio/${quality.name.lowercase()}"
-
     return MediaItem.Builder()
         .setMediaId(id.toString())
-        .setUri(audioUrl)
+        .setUri(audioUrl(id, quality))
         .setMediaMetadata(metadata)
         .build()
 }
+
+fun audioUrl(songId: Uuid, quality: AudioQuality): String =
+    "${BuildConfig.BASE_URL}songs/$songId/audio/${quality.name.lowercase()}"
+
+fun downloadId(songId: Uuid, quality: AudioQuality): String = "$songId/${quality.name}"
