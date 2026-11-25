@@ -1,8 +1,8 @@
 package com.nhajc.android.ui.home
 
-import com.nhajc.android.data.model.User
 import com.nhajc.android.data.model.AppError
 import com.nhajc.android.data.model.HomeContent
+import com.nhajc.android.data.model.User
 
 data class HomeUiState(
     val user: User? = null,

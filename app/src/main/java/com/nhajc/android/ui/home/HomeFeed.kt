@@ -59,30 +59,59 @@ internal fun HomeFeed(
     onPlayFavorite: (Uuid) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    PullToRefreshBox(isRefreshing = uiState.isRefreshing, onRefresh = onRefresh, modifier = modifier) {
+    PullToRefreshBox(
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag("home-feed"),
             contentPadding = PaddingValues(top = 12.dp, bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item(key = "welcome") {
-                Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(
+                    Modifier.padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     Text(
-                        text = uiState.user?.username?.let { stringResource(R.string.home_greeting, it) }
-                            ?: stringResource(R.string.home_welcome),
+                        text =
+                            uiState.user?.username?.let {
+                                stringResource(R.string.home_greeting, it)
+                            }
+                                ?: stringResource(R.string.home_welcome),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-                        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Column(
+                            Modifier.fillMaxWidth().padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
                             Icon(Icons.Outlined.Headphones, null, Modifier.size(36.dp))
-                            Text(stringResource(R.string.home_hero_title), style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold)
-                            Text(stringResource(R.string.home_hero_description), style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                stringResource(R.string.home_hero_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                stringResource(R.string.home_hero_description),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = onOpenSearch, modifier = Modifier.testTag("home-open-search")) {
+                                Button(
+                                    onClick = onOpenSearch,
+                                    modifier = Modifier.testTag("home-open-search")
+                                ) {
                                     Icon(Icons.Outlined.Search, null, Modifier.size(18.dp))
-                                    Text(stringResource(R.string.search), Modifier.padding(start = 6.dp))
+                                    Text(
+                                        stringResource(R.string.search),
+                                        Modifier.padding(start = 6.dp)
+                                    )
                                 }
                                 OutlinedButton(onClick = { onOpenLibrary(LibraryTab.RELEASES) }) {
                                     Text(stringResource(R.string.library))
@@ -92,75 +121,150 @@ internal fun HomeFeed(
                     }
                 }
             }
-            if (uiState.error != null) item(key = "error") {
-                Card(
-                    modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth().testTag("home-error"),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-                ) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Outlined.CloudOff, null)
-                        Text(stringResource(uiState.error.message()))
-                        if (!uiState.content.isEmpty) Text(stringResource(R.string.home_cached_content),
-                            style = MaterialTheme.typography.bodySmall)
-                        TextButton(onClick = onRefresh, enabled = !uiState.isRefreshing) {
-                            Text(stringResource(R.string.search_retry))
+            if (uiState.error != null) {
+                item(key = "error") {
+                    Card(
+                        modifier = Modifier.padding(
+                            horizontal = 20.dp
+                        ).fillMaxWidth().testTag("home-error"),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Column(
+                            Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Outlined.CloudOff, null)
+                            Text(stringResource(uiState.error.message()))
+                            if (!uiState.content.isEmpty) {
+                                Text(
+                                    stringResource(R.string.home_cached_content),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            TextButton(onClick = onRefresh, enabled = !uiState.isRefreshing) {
+                                Text(stringResource(R.string.search_retry))
+                            }
                         }
                     }
                 }
             }
-            if (uiState.isRefreshing && uiState.content.isEmpty) item(key = "loading") {
-                Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LinearProgressIndicator(Modifier.fillMaxWidth())
-                    Text(stringResource(R.string.home_loading), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (uiState.isRefreshing && uiState.content.isEmpty) {
+                item(key = "loading") {
+                    Column(
+                        Modifier.padding(horizontal = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        LinearProgressIndicator(Modifier.fillMaxWidth())
+                        Text(
+                            stringResource(R.string.home_loading),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
-            if (uiState.content.isEmpty && !uiState.isRefreshing && uiState.error == null) item(key = "empty") {
-                Column(Modifier.padding(horizontal = 24.dp).testTag("home-empty"),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.titleLarge)
-                    Text(stringResource(R.string.home_empty_description),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (uiState.content.isEmpty && !uiState.isRefreshing &&
+                uiState.error == null
+            ) {
+                item(key = "empty") {
+                    Column(
+                        Modifier.padding(horizontal = 24.dp).testTag("home-empty"),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.home_empty_title),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            stringResource(R.string.home_empty_description),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
-            if (uiState.content.releases.isNotEmpty()) item(key = "releases") {
-                HomeShelf(R.string.home_saved_releases, LibraryTab.RELEASES, uiState.content.releases,
-                    key = { it.id.toString() }, onOpenLibrary = onOpenLibrary) { release ->
-                    MediaGridItem(
-                        title = release.title, subtitle = release.artists.joinToString(", ") { it.name },
-                        imageUrl = release.coverUrl, fallbackIcon = Icons.Outlined.Album,
-                        showText = true, onClick = { onOpenRelease(release.id) }, modifier = Modifier.width(152.dp)
-                    )
+            if (uiState.content.releases.isNotEmpty()) {
+                item(key = "releases") {
+                    HomeShelf(
+                        R.string.home_saved_releases,
+                        LibraryTab.RELEASES,
+                        uiState.content.releases,
+                        key = { it.id.toString() },
+                        onOpenLibrary = onOpenLibrary
+                    ) { release ->
+                        MediaGridItem(
+                            title = release.title,
+                            subtitle = release.artists.joinToString(", ") {
+                                it.name
+                            },
+                            imageUrl = release.coverUrl,
+                            fallbackIcon = Icons.Outlined.Album,
+                            showText = true,
+                            onClick = {
+                                onOpenRelease(release.id)
+                            },
+                            modifier = Modifier.width(152.dp)
+                        )
+                    }
                 }
             }
-            if (uiState.content.playlists.isNotEmpty()) item(key = "playlists") {
-                HomeShelf(R.string.home_playlists, LibraryTab.PLAYLISTS, uiState.content.playlists,
-                    key = { it.id.toString() }, onOpenLibrary = onOpenLibrary) { playlist ->
-                    MediaGridItem(
-                        title = playlist.title, subtitle = playlist.owner.username,
-                        imageUrl = playlist.coverUrl, fallbackIcon = Icons.AutoMirrored.Outlined.QueueMusic,
-                        showText = true, onClick = { onOpenPlaylist(playlist.id) }, modifier = Modifier.width(152.dp)
-                    )
+            if (uiState.content.playlists.isNotEmpty()) {
+                item(key = "playlists") {
+                    HomeShelf(
+                        R.string.home_playlists,
+                        LibraryTab.PLAYLISTS,
+                        uiState.content.playlists,
+                        key = { it.id.toString() },
+                        onOpenLibrary = onOpenLibrary
+                    ) { playlist ->
+                        MediaGridItem(
+                            title = playlist.title,
+                            subtitle = playlist.owner.username,
+                            imageUrl = playlist.coverUrl,
+                            fallbackIcon = Icons.AutoMirrored.Outlined.QueueMusic,
+                            showText = true,
+                            onClick = {
+                                onOpenPlaylist(playlist.id)
+                            },
+                            modifier = Modifier.width(152.dp)
+                        )
+                    }
                 }
             }
-            if (uiState.content.artists.isNotEmpty()) item(key = "artists") {
-                HomeShelf(R.string.home_followed_artists, LibraryTab.ARTISTS, uiState.content.artists,
-                    key = { it.id.toString() }, onOpenLibrary = onOpenLibrary) { artist ->
-                    MediaGridItem(
-                        title = artist.name, subtitle = null, imageUrl = artist.avatarUrl,
-                        fallbackIcon = Icons.Outlined.Person, showText = true, isRound = true,
-                        onClick = { onOpenArtist(artist.id) }, modifier = Modifier.width(128.dp)
-                    )
+            if (uiState.content.artists.isNotEmpty()) {
+                item(key = "artists") {
+                    HomeShelf(
+                        R.string.home_followed_artists,
+                        LibraryTab.ARTISTS,
+                        uiState.content.artists,
+                        key = { it.id.toString() },
+                        onOpenLibrary = onOpenLibrary
+                    ) { artist ->
+                        MediaGridItem(
+                            title = artist.name,
+                            subtitle = null,
+                            imageUrl = artist.avatarUrl,
+                            fallbackIcon = Icons.Outlined.Person,
+                            showText = true,
+                            isRound = true,
+                            onClick = { onOpenArtist(artist.id) },
+                            modifier = Modifier.width(128.dp)
+                        )
+                    }
                 }
             }
             if (uiState.content.favorites.isNotEmpty()) {
                 item(key = "favorites-title") {
-                    HomeSectionTitle(R.string.home_favorites) { onOpenLibrary(LibraryTab.FAVORITES) }
+                    HomeSectionTitle(R.string.home_favorites) {
+                        onOpenLibrary(LibraryTab.FAVORITES)
+                    }
                 }
                 items(uiState.content.favorites, key = { "favorite:${it.id}" }) { song ->
                     MediaListItem(
                         title = song.title,
                         subtitle = song.artists.joinToString(", ") { it.name },
-                        imageUrl = song.coverUrl, fallbackIcon = Icons.Outlined.MusicNote,
+                        imageUrl = song.coverUrl,
+                        fallbackIcon = Icons.Outlined.MusicNote,
                         onClick = { onPlayFavorite(song.id) },
                         modifier = Modifier.testTag("home-play:${song.id}")
                     )
@@ -172,9 +276,16 @@ internal fun HomeFeed(
 
 @Composable
 private fun HomeSectionTitle(@StringRes title: Int, onSeeAll: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold)
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            stringResource(title),
+            Modifier.weight(1f),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold
+        )
         TextButton(onClick = onSeeAll) { Text(stringResource(R.string.home_see_all)) }
     }
 }
@@ -190,8 +301,10 @@ private fun <T> HomeShelf(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         HomeSectionTitle(title) { onOpenLibrary(tab) }
-        LazyRow(contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             items(items, key = key) { card(it) }
         }
     }

@@ -7,5 +7,6 @@ data class HomeContent(
     val favorites: List<Song> = emptyList()
 ) {
     val isEmpty: Boolean
-        get() = releases.isEmpty() && playlists.isEmpty() && artists.isEmpty() && favorites.isEmpty()
+        get() = releases.isEmpty() && playlists.isEmpty() && artists.isEmpty() &&
+            favorites.isEmpty()
 }

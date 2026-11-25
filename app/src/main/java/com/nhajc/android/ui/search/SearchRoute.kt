@@ -26,7 +26,12 @@ fun SearchRoute(
     var categoryNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val scope = rememberCoroutineScope()
     val controller = remember(repository, scope) {
-        SearchController(repository, scope, query, categoryNames.map(SearchCategory::valueOf).toSet())
+        SearchController(
+            repository,
+            scope,
+            query,
+            categoryNames.map(SearchCategory::valueOf).toSet()
+        )
     }
     val model by controller.model.collectAsStateWithLifecycle()
 
@@ -34,7 +39,10 @@ fun SearchRoute(
 
     SearchScreen(
         model = model,
-        onQueryChange = { query = it; controller.updateQuery(it) },
+        onQueryChange = {
+            query = it
+            controller.updateQuery(it)
+        },
         onCategoryChange = {
             controller.selectCategory(it)
             categoryNames = controller.model.value.categories.map { category -> category.name }

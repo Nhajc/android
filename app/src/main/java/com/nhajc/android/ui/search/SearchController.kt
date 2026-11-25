@@ -54,8 +54,12 @@ class SearchController(
         val query = snapshot.query.trim()
         val valid = query.isNotEmpty() && query.length <= 100
         mutableModel.value = snapshot.copy(
-            items = emptyList(), isLoading = valid, isLoadingMore = false,
-            hasSearched = query.isNotEmpty(), page = 0, hasNext = false,
+            items = emptyList(),
+            isLoading = valid,
+            isLoadingMore = false,
+            hasSearched = query.isNotEmpty(),
+            page = 0,
+            hasNext = false,
             error = if (query.length > 100) SearchError.INVALID_QUERY else null
         )
         if (!valid) return
@@ -65,8 +69,11 @@ class SearchController(
                 val result = repository.search(query, snapshot.categories)
                 currentCoroutineContext().ensureActive()
                 mutableModel.value = model.value.copy(
-                    items = result.items, page = result.page, hasNext = result.hasNext,
-                    isLoading = false, error = null
+                    items = result.items,
+                    page = result.page,
+                    hasNext = result.hasNext,
+                    isLoading = false,
+                    error = null
                 )
             } catch (exception: CancellationException) {
                 throw exception
@@ -83,18 +90,25 @@ class SearchController(
         mutableModel.value = snapshot.copy(isLoadingMore = true, error = null)
         searchJob = scope.launch {
             try {
-                val result = repository.search(snapshot.query.trim(), snapshot.categories, snapshot.page + 1)
+                val result = repository.search(
+                    snapshot.query.trim(),
+                    snapshot.categories,
+                    snapshot.page + 1
+                )
                 currentCoroutineContext().ensureActive()
                 mutableModel.value = model.value.copy(
                     items = (snapshot.items + result.items).distinctBy { it.category to it.id },
-                    page = result.page, hasNext = result.hasNext,
-                    isLoadingMore = false, error = null
+                    page = result.page,
+                    hasNext = result.hasNext,
+                    isLoadingMore = false,
+                    error = null
                 )
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
                 currentCoroutineContext().ensureActive()
-                mutableModel.value = model.value.copy(isLoadingMore = false, error = exception.reason())
+                mutableModel.value =
+                    model.value.copy(isLoadingMore = false, error = exception.reason())
             }
         }
     }

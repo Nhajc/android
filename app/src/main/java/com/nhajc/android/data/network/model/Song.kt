@@ -13,8 +13,15 @@ data class ReorderSongsRequest(val songIds: List<Uuid>)
 
 @Serializable
 data class StagedSongResponse(val id: Uuid, val durationSeconds: Int, val expiresAt: Instant)
+
 @Serializable
-data class UploadedSongDetails(val id: Uuid, val title: String, val description: String?, val artistIds: List<Uuid>)
+data class UploadedSongDetails(
+    val id: Uuid,
+    val title: String,
+    val description: String?,
+    val artistIds: List<Uuid>
+)
+
 @Serializable
 data class SaveUploadedSongsRequest(val songs: List<UploadedSongDetails>, val songIds: List<Uuid>)
 

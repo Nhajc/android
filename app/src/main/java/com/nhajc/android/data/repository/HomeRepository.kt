@@ -17,8 +17,10 @@ class HomeRepository @Inject constructor(
 
     // Read the local library so cached content remains visible without a connection.
     val content: Flow<HomeContent> = combine(
-        library.homeReleases(8), library.homePlaylists(8),
-        library.homeArtists(8), library.homeFavorites(6)
+        library.homeReleases(8),
+        library.homePlaylists(8),
+        library.homeArtists(8),
+        library.homeFavorites(6)
     ) { releases, playlists, artists, favorites ->
         HomeContent(
             releases = releases.map { it.asModel() },

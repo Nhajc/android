@@ -53,6 +53,7 @@ class LibraryRepository @Inject constructor(
     private val database: AppDatabase
 ) {
     private val syncMutex = Mutex()
+
     @Volatile private var syncVersion = 0L
     private val libraryDao = database.libraryDao()
     private val userDao = database.userDao()

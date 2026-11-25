@@ -26,7 +26,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val serverUrl = providers.gradleProperty("nhajc.serverUrl").getOrElse("http://localhost:8080/api/v1/")
+        val serverUrl = providers.gradleProperty(
+            "nhajc.serverUrl"
+        ).getOrElse("http://localhost:8080/api/v1/")
         buildConfigField("String", "BASE_URL", "\"$serverUrl\"")
     }
 

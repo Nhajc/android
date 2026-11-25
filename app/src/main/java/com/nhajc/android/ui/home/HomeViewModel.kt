@@ -40,7 +40,8 @@ class HomeViewModel @Inject constructor(
     private var actor: Uuid? = null
 
     val uiState = combine(
-        state, users.user,
+        state,
+        users.user,
         repository.content.catch { exception ->
             if (exception is CancellationException) throw exception
             state.update { it.copy(error = AppError.SERVER) }
@@ -75,8 +76,10 @@ class HomeViewModel @Inject constructor(
             } catch (exception: Exception) {
                 currentCoroutineContext().ensureActive()
                 state.update {
-                    it.copy(isRefreshing = false,
-                        error = (exception as? AppException)?.error ?: AppError.SERVER)
+                    it.copy(
+                        isRefreshing = false,
+                        error = (exception as? AppException)?.error ?: AppError.SERVER
+                    )
                 }
             }
         }
@@ -106,7 +109,12 @@ class HomeViewModel @Inject constructor(
             } catch (exception: CancellationException) {
                 throw exception
             } catch (exception: Exception) {
-                state.update { it.copy(error = (exception as? AppException)?.error ?: AppError.SERVER) }
+                state.update {
+                    it.copy(
+                        error =
+                            (exception as? AppException)?.error ?: AppError.SERVER
+                    )
+                }
             }
         }
     }

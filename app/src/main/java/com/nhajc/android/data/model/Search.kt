@@ -3,7 +3,12 @@ package com.nhajc.android.data.model
 enum class SearchCategory { RELEASE, PLAYLIST, ARTIST, SONG }
 
 enum class SearchError {
-    NETWORK, UNAUTHORIZED, INVALID_QUERY, INVALID_RESPONSE, SERVER, UNKNOWN
+    NETWORK,
+    UNAUTHORIZED,
+    INVALID_QUERY,
+    INVALID_RESPONSE,
+    SERVER,
+    UNKNOWN
 }
 
 // Presentation models deliberately contain no network DTOs or database entities.
