@@ -46,3 +46,6 @@ adb reverse tcp:9000 tcp:9000 # MinIO (images and audio)
 * Shows the connected devices: `adb devices`
 * Shows the forwarded ports: `adb reverse --list`
 * Stops Gradle in the background: `./gradlew --stop`
+* Formats the Kotlin code: `./gradlew ktlintFormat`
+* Checks the formatting (the same check runs on every pull request): `./gradlew ktlintCheck`
+* Formats your staged Kotlin files on every commit (run once per clone): `./gradlew addKtlintFormatGitPreCommitHook`
