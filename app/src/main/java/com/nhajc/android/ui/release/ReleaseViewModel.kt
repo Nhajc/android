@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nhajc.android.data.model.AppException
 import com.nhajc.android.data.model.Song
+import com.nhajc.android.data.repository.DownloadRepository
 import com.nhajc.android.data.repository.LibraryRepository
 import com.nhajc.android.data.repository.ReleaseRepository
 import com.nhajc.android.playback.PlaybackController
@@ -25,6 +26,7 @@ class ReleaseViewModel @AssistedInject constructor(
     @Assisted private val releaseId: Uuid,
     private val releaseRepository: ReleaseRepository,
     private val libraryRepository: LibraryRepository,
+    private val downloadRepository: DownloadRepository,
     private val playbackController: PlaybackController
 ) : ViewModel() {
     private val state = MutableStateFlow(ReleaseUiState())
@@ -32,9 +34,10 @@ class ReleaseViewModel @AssistedInject constructor(
     val uiState: StateFlow<ReleaseUiState> = combine(
         state,
         releaseRepository.release(releaseId),
-        releaseRepository.songs(releaseId)
-    ) { current, release, songs ->
-        current.copy(release = release, songs = songs)
+        releaseRepository.songs(releaseId),
+        downloadRepository.progress
+    ) { current, release, songs, downloadProgress ->
+        current.copy(release = release, songs = songs, downloadProgress = downloadProgress)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReleaseUiState())
 
     init {
@@ -94,6 +97,32 @@ class ReleaseViewModel @AssistedInject constructor(
                 state.update { it.copy(error = exception.error) }
             }
         }
+    }
+
+    fun onSongDownloadClick(song: Song) {
+        viewModelScope.launch {
+            downloadRepository.setSongDownloaded(song.id, song.fileQuality == null)
+        }
+    }
+
+    fun onDownloadClick() {
+        val release = uiState.value.release ?: return
+
+        viewModelScope.launch {
+            try {
+                if (!release.isSaved) {
+                    releaseRepository.setSaved(release.id, true)
+                }
+
+                downloadRepository.setReleaseDownloaded(release.id, true)
+            } catch (exception: AppException) {
+                state.update { it.copy(error = exception.error) }
+            }
+        }
+    }
+
+    fun onRemoveDownloadClick() {
+        viewModelScope.launch { downloadRepository.setReleaseDownloaded(releaseId, false) }
     }
 
     fun onErrorShown() {

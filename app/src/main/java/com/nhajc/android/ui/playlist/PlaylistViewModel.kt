@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nhajc.android.data.model.AppException
 import com.nhajc.android.data.model.Song
+import com.nhajc.android.data.repository.DownloadRepository
 import com.nhajc.android.data.repository.LibraryRepository
 import com.nhajc.android.data.repository.PlaylistRepository
 import com.nhajc.android.data.repository.UserRepository
@@ -26,6 +27,7 @@ class PlaylistViewModel @AssistedInject constructor(
     @Assisted private val playlistId: Uuid,
     private val playlistRepository: PlaylistRepository,
     private val libraryRepository: LibraryRepository,
+    private val downloadRepository: DownloadRepository,
     private val playbackController: PlaybackController,
     userRepository: UserRepository
 ) : ViewModel() {
@@ -35,11 +37,17 @@ class PlaylistViewModel @AssistedInject constructor(
         state,
         playlistRepository.playlist(playlistId),
         playlistRepository.songs(playlistId),
+        downloadRepository.progress,
         userRepository.user
-    ) { current, playlist, songs, user ->
+    ) { current, playlist, songs, downloadProgress, user ->
         val isOwned = playlist != null && playlist.owner.id == user?.id
 
-        current.copy(playlist = playlist, songs = songs, isOwned = isOwned)
+        current.copy(
+            playlist = playlist,
+            songs = songs,
+            downloadProgress = downloadProgress,
+            isOwned = isOwned
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlaylistUiState())
 
     init {
@@ -99,6 +107,33 @@ class PlaylistViewModel @AssistedInject constructor(
                 state.update { it.copy(error = exception.error) }
             }
         }
+    }
+
+    fun onSongDownloadClick(song: Song) {
+        viewModelScope.launch {
+            downloadRepository.setSongDownloaded(song.id, song.fileQuality == null)
+        }
+    }
+
+    fun onDownloadClick() {
+        val current = uiState.value
+        val playlist = current.playlist ?: return
+
+        viewModelScope.launch {
+            try {
+                if (!current.isOwned && !playlist.isSaved) {
+                    playlistRepository.setSaved(playlist.id, true)
+                }
+
+                downloadRepository.setPlaylistDownloaded(playlist.id, true)
+            } catch (exception: AppException) {
+                state.update { it.copy(error = exception.error) }
+            }
+        }
+    }
+
+    fun onRemoveDownloadClick() {
+        viewModelScope.launch { downloadRepository.setPlaylistDownloaded(playlistId, false) }
     }
 
     fun onDeleteClick() {

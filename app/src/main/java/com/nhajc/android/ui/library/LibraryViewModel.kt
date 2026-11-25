@@ -13,6 +13,7 @@ import com.nhajc.android.data.model.LibraryView
 import com.nhajc.android.data.model.Playlist
 import com.nhajc.android.data.model.Release
 import com.nhajc.android.data.model.Song
+import com.nhajc.android.data.repository.DownloadRepository
 import com.nhajc.android.data.repository.LibraryRepository
 import com.nhajc.android.data.repository.PlaylistRepository
 import com.nhajc.android.data.repository.SettingsRepository
@@ -40,6 +41,7 @@ class LibraryViewModel @Inject constructor(
     private val playlistRepository: PlaylistRepository,
     private val settingsRepository: SettingsRepository,
     private val playbackController: PlaybackController,
+    downloadRepository: DownloadRepository,
     userRepository: UserRepository
 ) : ViewModel() {
     private val state = MutableStateFlow(LibraryUiState())
@@ -51,9 +53,10 @@ class LibraryViewModel @Inject constructor(
     val uiState: StateFlow<LibraryUiState> = combine(
         state,
         settings,
-        userRepository.user
-    ) { current, settings, user ->
-        current.copy(settings = settings, user = user)
+        userRepository.user,
+        downloadRepository.progress
+    ) { current, settings, user, downloadProgress ->
+        current.copy(settings = settings, user = user, downloadProgress = downloadProgress)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LibraryUiState())
 
     val releases: Flow<PagingData<Release>> =

@@ -131,7 +131,8 @@ internal fun DownloadsScreen(
                         title = song.title,
                         subtitle = song.artists.joinToString(", ") { it.name },
                         imageUrl = song.coverUrl,
-                        fallbackIcon = Icons.Outlined.MusicNote
+                        fallbackIcon = Icons.Outlined.MusicNote,
+                        downloadProgress = uiState.downloadProgress[song.id]
                     )
                 },
                 onItemClick = onSongClick

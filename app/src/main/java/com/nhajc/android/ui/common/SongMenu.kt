@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.FileDownloadOff
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -23,8 +24,10 @@ import com.nhajc.android.R
 fun SongMenuButton(
     isFavorite: Boolean,
     isFavoriteEnabled: Boolean,
+    hasDownload: Boolean,
     onFavoriteClick: () -> Unit,
-    onAddToPlaylistClick: () -> Unit
+    onAddToPlaylistClick: () -> Unit,
+    onDownloadClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -64,12 +67,30 @@ fun SongMenuButton(
                 }
             )
 
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.download)) },
-                leadingIcon = { Icon(Icons.Outlined.Download, contentDescription = null) },
-                // TODO: download the song (Media3 DownloadManager, downloads branch)
-                onClick = { expanded = false }
+            DownloadMenuItem(
+                isRemove = hasDownload,
+                onClick = {
+                    expanded = false
+                    onDownloadClick()
+                }
             )
         }
+    }
+}
+
+@Composable
+fun DownloadMenuItem(isRemove: Boolean, onClick: () -> Unit) {
+    if (isRemove) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.remove_download)) },
+            leadingIcon = { Icon(Icons.Outlined.FileDownloadOff, contentDescription = null) },
+            onClick = onClick
+        )
+    } else {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.download)) },
+            leadingIcon = { Icon(Icons.Outlined.Download, contentDescription = null) },
+            onClick = onClick
+        )
     }
 }

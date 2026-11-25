@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import com.nhajc.android.data.model.AppException
+import com.nhajc.android.data.repository.DownloadRepository
 import com.nhajc.android.data.repository.LibraryRepository
 import com.nhajc.android.playback.PlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     playbackController: PlaybackController,
-    private val libraryRepository: LibraryRepository
+    private val libraryRepository: LibraryRepository,
+    private val downloadRepository: DownloadRepository
 ) : ViewModel() {
     val player: StateFlow<Player?> = playbackController.player
 
@@ -66,6 +68,14 @@ class PlayerViewModel @Inject constructor(
             } finally {
                 state.update { it.copy(isUpdatingFavorite = false) }
             }
+        }
+    }
+
+    fun onDownloadClick() {
+        val song = uiState.value.song ?: return
+
+        viewModelScope.launch {
+            downloadRepository.setSongDownloaded(song.id, song.fileQuality == null)
         }
     }
 

@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import com.nhajc.android.data.model.DownloadSort
 import com.nhajc.android.data.model.LibraryView
 import com.nhajc.android.data.model.Song
+import com.nhajc.android.data.repository.DownloadRepository
 import com.nhajc.android.data.repository.LibraryRepository
 import com.nhajc.android.data.repository.SettingsRepository
 import com.nhajc.android.playback.PlaybackController
@@ -30,7 +31,8 @@ import kotlinx.coroutines.launch
 class DownloadsViewModel @Inject constructor(
     private val libraryRepository: LibraryRepository,
     private val settingsRepository: SettingsRepository,
-    private val playbackController: PlaybackController
+    private val playbackController: PlaybackController,
+    downloadRepository: DownloadRepository
 ) : ViewModel() {
     private val state = MutableStateFlow(DownloadsUiState())
 
@@ -40,8 +42,16 @@ class DownloadsViewModel @Inject constructor(
 
     private val query = state.map { it.query }.distinctUntilChanged()
 
-    val uiState: StateFlow<DownloadsUiState> = combine(state, settings) { current, settings ->
-        current.copy(sort = settings.downloadSort, view = settings.view)
+    val uiState: StateFlow<DownloadsUiState> = combine(
+        state,
+        settings,
+        downloadRepository.progress
+    ) { current, settings, downloadProgress ->
+        current.copy(
+            sort = settings.downloadSort,
+            view = settings.view,
+            downloadProgress = downloadProgress
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DownloadsUiState())
 
     val songs: Flow<PagingData<Song>> = combine(query, sort, ::Pair)

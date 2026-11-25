@@ -353,7 +353,7 @@ private fun LibraryContent(
             view = view,
             emptyText = emptyText(isFiltered, R.string.empty_favorites),
             key = { it.id.toString() },
-            entry = { song -> song.entry() },
+            entry = { song -> song.entry(uiState.downloadProgress[song.id]) },
             onItemClick = onFavoriteClick
         )
     }
@@ -379,8 +379,13 @@ private fun Playlist.entry() =
 private fun ArtistSummary.entry() =
     MediaEntry(name, null, avatarUrl, Icons.Outlined.Person, isRound = true)
 
-private fun Song.entry() =
-    MediaEntry(title, artists.joinToString(", ") { it.name }, coverUrl, Icons.Outlined.MusicNote)
+private fun Song.entry(downloadProgress: Float?) = MediaEntry(
+    title = title,
+    subtitle = artists.joinToString(", ") { it.name },
+    imageUrl = coverUrl,
+    fallbackIcon = Icons.Outlined.MusicNote,
+    downloadProgress = downloadProgress
+)
 
 @Composable
 private fun emptyText(isFiltered: Boolean, @StringRes empty: Int): String = if (isFiltered) {

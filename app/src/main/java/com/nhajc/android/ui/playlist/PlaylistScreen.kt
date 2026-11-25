@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.MoreVert
@@ -61,6 +60,7 @@ import com.nhajc.android.data.model.Song
 import com.nhajc.android.data.model.UserSummary
 import com.nhajc.android.ui.common.CollectionHeader
 import com.nhajc.android.ui.common.CoverImage
+import com.nhajc.android.ui.common.DownloadMenuItem
 import com.nhajc.android.ui.common.SaveButton
 import com.nhajc.android.ui.common.SongRow
 import com.nhajc.android.ui.common.message
@@ -92,6 +92,9 @@ fun PlaylistScreen(
         onSaveClick = viewModel::onSaveClick,
         onSongClick = viewModel::onSongClick,
         onFavoriteClick = viewModel::onFavoriteClick,
+        onSongDownloadClick = viewModel::onSongDownloadClick,
+        onDownloadClick = viewModel::onDownloadClick,
+        onRemoveDownloadClick = viewModel::onRemoveDownloadClick,
         onDeleteClick = viewModel::onDeleteClick,
         onDeleteDismiss = viewModel::onDeleteDismiss,
         onDeleteConfirm = viewModel::onDeleteConfirm,
@@ -110,6 +113,9 @@ internal fun PlaylistScreen(
     onSaveClick: () -> Unit,
     onSongClick: (index: Int) -> Unit,
     onFavoriteClick: (Song) -> Unit,
+    onSongDownloadClick: (Song) -> Unit,
+    onDownloadClick: () -> Unit,
+    onRemoveDownloadClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onDeleteDismiss: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -143,8 +149,19 @@ internal fun PlaylistScreen(
                     }
                 },
                 actions = {
-                    if (playlist != null) {
-                        PlaylistMenuButton(isOwned = uiState.isOwned, onDeleteClick = onDeleteClick)
+                    val hasMenu = uiState.isOwned ||
+                        uiState.canDownload ||
+                        uiState.canRemoveDownload
+
+                    if (playlist != null && hasMenu) {
+                        PlaylistMenuButton(
+                            isOwned = uiState.isOwned,
+                            canDownload = uiState.canDownload,
+                            canRemoveDownload = uiState.canRemoveDownload,
+                            onDownloadClick = onDownloadClick,
+                            onRemoveDownloadClick = onRemoveDownloadClick,
+                            onDeleteClick = onDeleteClick
+                        )
                     }
                 }
             )
@@ -160,6 +177,7 @@ internal fun PlaylistScreen(
             playlist != null -> PlaylistContent(
                 playlist = playlist,
                 songs = uiState.songs,
+                downloadProgress = uiState.downloadProgress,
                 isOwned = uiState.isOwned,
                 isUpdatingSave = uiState.isUpdatingSave,
                 onPlayClick = onPlayClick,
@@ -168,6 +186,7 @@ internal fun PlaylistScreen(
                 onSongClick = onSongClick,
                 onFavoriteClick = onFavoriteClick,
                 onAddToPlaylistClick = { song -> addingSong = song },
+                onSongDownloadClick = onSongDownloadClick,
                 modifier = contentModifier
             )
 
@@ -209,6 +228,7 @@ internal fun PlaylistScreen(
 private fun PlaylistContent(
     playlist: Playlist,
     songs: List<Song>,
+    downloadProgress: Map<Uuid, Float>,
     isOwned: Boolean,
     isUpdatingSave: Boolean,
     onPlayClick: () -> Unit,
@@ -217,6 +237,7 @@ private fun PlaylistContent(
     onSongClick: (index: Int) -> Unit,
     onFavoriteClick: (Song) -> Unit,
     onAddToPlaylistClick: (Song) -> Unit,
+    onSongDownloadClick: (Song) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val subtitle = pluralStringResource(R.plurals.playlist_subtitle, songs.size, songs.size)
@@ -265,9 +286,11 @@ private fun PlaylistContent(
                 number = index + 1,
                 song = song,
                 showCover = true,
+                downloadProgress = downloadProgress[song.id],
                 onClick = { onSongClick(index) },
                 onFavoriteClick = { onFavoriteClick(song) },
-                onAddToPlaylistClick = { onAddToPlaylistClick(song) }
+                onAddToPlaylistClick = { onAddToPlaylistClick(song) },
+                onDownloadClick = { onSongDownloadClick(song) }
             )
         }
     }
@@ -303,7 +326,14 @@ private fun OwnerLine(owner: UserSummary, isPrivate: Boolean) {
 }
 
 @Composable
-private fun PlaylistMenuButton(isOwned: Boolean, onDeleteClick: () -> Unit) {
+private fun PlaylistMenuButton(
+    isOwned: Boolean,
+    canDownload: Boolean,
+    canRemoveDownload: Boolean,
+    onDownloadClick: () -> Unit,
+    onRemoveDownloadClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
@@ -315,12 +345,25 @@ private fun PlaylistMenuButton(isOwned: Boolean, onDeleteClick: () -> Unit) {
         }
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.download)) },
-                leadingIcon = { Icon(Icons.Outlined.Download, contentDescription = null) },
-                // TODO: download the playlist (Media3 DownloadManager, downloads branch)
-                onClick = { expanded = false }
-            )
+            if (canDownload) {
+                DownloadMenuItem(
+                    isRemove = false,
+                    onClick = {
+                        expanded = false
+                        onDownloadClick()
+                    }
+                )
+            }
+
+            if (canRemoveDownload) {
+                DownloadMenuItem(
+                    isRemove = true,
+                    onClick = {
+                        expanded = false
+                        onRemoveDownloadClick()
+                    }
+                )
+            }
 
             if (isOwned) {
                 DropdownMenuItem(
@@ -408,6 +451,9 @@ private fun PlaylistScreenPreview() {
             onSaveClick = {},
             onSongClick = {},
             onFavoriteClick = {},
+            onSongDownloadClick = {},
+            onDownloadClick = {},
+            onRemoveDownloadClick = {},
             onDeleteClick = {},
             onDeleteDismiss = {},
             onDeleteConfirm = {},

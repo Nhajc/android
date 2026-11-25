@@ -23,9 +23,11 @@ fun SongRow(
     number: Int,
     song: Song,
     showCover: Boolean,
+    downloadProgress: Float?,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
     onAddToPlaylistClick: () -> Unit,
+    onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ListItem(
@@ -62,7 +64,14 @@ fun SongRow(
             )
         },
         trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (downloadProgress != null) {
+                    DownloadIndicator(downloadProgress)
+                }
+
                 Text(
                     text = formatDuration(song.durationSeconds),
                     style = MaterialTheme.typography.bodySmall,
@@ -72,8 +81,10 @@ fun SongRow(
                 SongMenuButton(
                     isFavorite = song.isFavorite,
                     isFavoriteEnabled = true,
+                    hasDownload = song.fileQuality != null,
                     onFavoriteClick = onFavoriteClick,
-                    onAddToPlaylistClick = onAddToPlaylistClick
+                    onAddToPlaylistClick = onAddToPlaylistClick,
+                    onDownloadClick = onDownloadClick
                 )
             }
         }

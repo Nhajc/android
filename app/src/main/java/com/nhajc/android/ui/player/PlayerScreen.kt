@@ -89,6 +89,7 @@ fun PlayerScreen(
         player = current,
         onSongChange = viewModel::onSongChange,
         onFavoriteClick = viewModel::onFavoriteClick,
+        onDownloadClick = viewModel::onDownloadClick,
         onErrorShown = viewModel::onErrorShown,
         onClose = onClose,
         onOpenArtist = onOpenArtist,
@@ -104,6 +105,7 @@ internal fun PlayerScreen(
     player: Player,
     onSongChange: (String?) -> Unit,
     onFavoriteClick: () -> Unit,
+    onDownloadClick: () -> Unit,
     onErrorShown: () -> Unit,
     onClose: () -> Unit,
     onOpenArtist: (Uuid) -> Unit,
@@ -185,8 +187,10 @@ internal fun PlayerScreen(
                     SongMenuButton(
                         isFavorite = song?.isFavorite == true,
                         isFavoriteEnabled = song != null && !uiState.isUpdatingFavorite,
+                        hasDownload = song?.fileQuality != null,
                         onFavoriteClick = onFavoriteClick,
-                        onAddToPlaylistClick = { addingSong = song }
+                        onAddToPlaylistClick = { addingSong = song },
+                        onDownloadClick = onDownloadClick
                     )
                 }
             )

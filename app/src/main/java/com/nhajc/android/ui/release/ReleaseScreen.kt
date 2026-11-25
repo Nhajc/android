@@ -15,11 +15,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Album
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +49,7 @@ import com.nhajc.android.data.model.ReleaseType
 import com.nhajc.android.data.model.Song
 import com.nhajc.android.ui.common.ArtistLine
 import com.nhajc.android.ui.common.CollectionHeader
+import com.nhajc.android.ui.common.DownloadMenuItem
 import com.nhajc.android.ui.common.SaveButton
 import com.nhajc.android.ui.common.SongRow
 import com.nhajc.android.ui.common.label
@@ -81,6 +80,9 @@ fun ReleaseScreen(
         onSaveClick = viewModel::onSaveClick,
         onSongClick = viewModel::onSongClick,
         onFavoriteClick = viewModel::onFavoriteClick,
+        onSongDownloadClick = viewModel::onSongDownloadClick,
+        onDownloadClick = viewModel::onDownloadClick,
+        onRemoveDownloadClick = viewModel::onRemoveDownloadClick,
         onErrorShown = viewModel::onErrorShown
     )
 }
@@ -97,6 +99,9 @@ internal fun ReleaseScreen(
     onSaveClick: () -> Unit,
     onSongClick: (index: Int) -> Unit,
     onFavoriteClick: (Song) -> Unit,
+    onSongDownloadClick: (Song) -> Unit,
+    onDownloadClick: () -> Unit,
+    onRemoveDownloadClick: () -> Unit,
     onErrorShown: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -127,8 +132,13 @@ internal fun ReleaseScreen(
                     }
                 },
                 actions = {
-                    if (release != null) {
-                        ReleaseMenuButton()
+                    if (release != null && (uiState.canDownload || uiState.canRemoveDownload)) {
+                        ReleaseMenuButton(
+                            canDownload = uiState.canDownload,
+                            canRemoveDownload = uiState.canRemoveDownload,
+                            onDownloadClick = onDownloadClick,
+                            onRemoveDownloadClick = onRemoveDownloadClick
+                        )
                     }
                 }
             )
@@ -144,6 +154,7 @@ internal fun ReleaseScreen(
             release != null -> ReleaseContent(
                 release = release,
                 songs = uiState.songs,
+                downloadProgress = uiState.downloadProgress,
                 isUpdatingSave = uiState.isUpdatingSave,
                 onOpenArtist = onOpenArtist,
                 onPlayClick = onPlayClick,
@@ -152,6 +163,7 @@ internal fun ReleaseScreen(
                 onSongClick = onSongClick,
                 onFavoriteClick = onFavoriteClick,
                 onAddToPlaylistClick = { song -> addingSong = song },
+                onSongDownloadClick = onSongDownloadClick,
                 modifier = contentModifier
             )
 
@@ -184,6 +196,7 @@ internal fun ReleaseScreen(
 private fun ReleaseContent(
     release: Release,
     songs: List<Song>,
+    downloadProgress: Map<Uuid, Float>,
     isUpdatingSave: Boolean,
     onOpenArtist: (Uuid) -> Unit,
     onPlayClick: () -> Unit,
@@ -192,6 +205,7 @@ private fun ReleaseContent(
     onSongClick: (index: Int) -> Unit,
     onFavoriteClick: (Song) -> Unit,
     onAddToPlaylistClick: (Song) -> Unit,
+    onSongDownloadClick: (Song) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val subtitle = stringResource(
@@ -242,16 +256,23 @@ private fun ReleaseContent(
                 number = song.trackNumber,
                 song = song,
                 showCover = false,
+                downloadProgress = downloadProgress[song.id],
                 onClick = { onSongClick(index) },
                 onFavoriteClick = { onFavoriteClick(song) },
-                onAddToPlaylistClick = { onAddToPlaylistClick(song) }
+                onAddToPlaylistClick = { onAddToPlaylistClick(song) },
+                onDownloadClick = { onSongDownloadClick(song) }
             )
         }
     }
 }
 
 @Composable
-private fun ReleaseMenuButton() {
+private fun ReleaseMenuButton(
+    canDownload: Boolean,
+    canRemoveDownload: Boolean,
+    onDownloadClick: () -> Unit,
+    onRemoveDownloadClick: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
@@ -263,12 +284,25 @@ private fun ReleaseMenuButton() {
         }
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.download)) },
-                leadingIcon = { Icon(Icons.Outlined.Download, contentDescription = null) },
-                // TODO: download the release (Media3 DownloadManager, downloads branch)
-                onClick = { expanded = false }
-            )
+            if (canDownload) {
+                DownloadMenuItem(
+                    isRemove = false,
+                    onClick = {
+                        expanded = false
+                        onDownloadClick()
+                    }
+                )
+            }
+
+            if (canRemoveDownload) {
+                DownloadMenuItem(
+                    isRemove = true,
+                    onClick = {
+                        expanded = false
+                        onRemoveDownloadClick()
+                    }
+                )
+            }
         }
     }
 }
@@ -316,6 +350,9 @@ private fun ReleaseScreenPreview() {
             onSaveClick = {},
             onSongClick = {},
             onFavoriteClick = {},
+            onSongDownloadClick = {},
+            onDownloadClick = {},
+            onRemoveDownloadClick = {},
             onErrorShown = {}
         )
     }

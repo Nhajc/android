@@ -47,7 +47,8 @@ fun MediaListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isRound: Boolean = false,
-    isHighlighted: Boolean = false
+    isHighlighted: Boolean = false,
+    downloadProgress: Float? = null
 ) {
     val titleColor = if (isHighlighted) {
         MaterialTheme.colorScheme.primary
@@ -72,6 +73,11 @@ fun MediaListItem(
                 modifier = Modifier.size(56.dp),
                 shape = mediaShape(isRound)
             )
+        },
+        trailingContent = if (downloadProgress == null) {
+            null
+        } else {
+            { DownloadIndicator(downloadProgress) }
         }
     )
 }
@@ -132,7 +138,8 @@ data class MediaEntry(
     val subtitle: String?,
     val imageUrl: String?,
     val fallbackIcon: ImageVector,
-    val isRound: Boolean = false
+    val isRound: Boolean = false,
+    val downloadProgress: Float? = null
 )
 
 @Composable
@@ -177,7 +184,8 @@ fun <T : Any> PagedMediaItems(
                         imageUrl = current.imageUrl,
                         fallbackIcon = current.fallbackIcon,
                         onClick = { onItemClick(index) },
-                        isRound = current.isRound
+                        isRound = current.isRound,
+                        downloadProgress = current.downloadProgress
                     )
                 }
             }
