@@ -12,6 +12,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -33,17 +34,15 @@ class MainActivityViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userRepository.isLoggedIn
-                .distinctUntilChanged()
-                .collect { isLoggedIn ->
-                    if (isLoggedIn) {
-                        try {
-                            libraryRepository.sync()
-                        } catch (exception: AppException) {
-                            Log.w(TAG, "Library sync failed", exception)
-                        }
+            userRepository.isLoggedIn.distinctUntilChanged().collectLatest { isLoggedIn ->
+                if (isLoggedIn) {
+                    try {
+                        libraryRepository.sync()
+                    } catch (exception: AppException) {
+                        Log.w(TAG, "Library sync failed", exception)
                     }
                 }
+            }
         }
     }
 }

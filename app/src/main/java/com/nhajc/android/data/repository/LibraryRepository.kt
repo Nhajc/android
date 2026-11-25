@@ -38,6 +38,8 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.apache.commons.lang3.StringUtils
 import retrofit2.HttpException
 
@@ -50,6 +52,8 @@ class LibraryRepository @Inject constructor(
     private val libraryApi: LibraryApi,
     private val database: AppDatabase
 ) {
+    private val syncMutex = Mutex()
+    @Volatile private var syncVersion = 0L
     private val libraryDao = database.libraryDao()
     private val userDao = database.userDao()
     private val artistDao = database.artistDao()
@@ -102,6 +106,16 @@ class LibraryRepository @Inject constructor(
     }
 
     suspend fun sync() {
+        val requestedVersion = syncVersion
+        syncMutex.withLock {
+            // Home, app startup and pull-to-refresh share an in-flight successful sync.
+            if (syncVersion != requestedVersion) return@withLock
+            syncLibrary()
+            syncVersion++
+        }
+    }
+
+    private suspend fun syncLibrary() {
         val releases = fetchAll { page -> libraryApi.getReleases(page, SYNC_PAGE_SIZE) }
         val playlists = fetchAll { page -> libraryApi.getPlaylists(page, SYNC_PAGE_SIZE) }
         val artists = fetchAll { page -> libraryApi.getArtists(page, SYNC_PAGE_SIZE) }
