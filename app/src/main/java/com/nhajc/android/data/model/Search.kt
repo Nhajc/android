@@ -3,7 +3,12 @@ package com.nhajc.android.data.model
 enum class SearchCategory { RELEASE, PLAYLIST, ARTIST, SONG }
 
 enum class SearchError {
-    NETWORK, UNAUTHORIZED, INVALID_QUERY, INVALID_RESPONSE, SERVER, UNKNOWN
+    NETWORK,
+    UNAUTHORIZED,
+    INVALID_QUERY,
+    INVALID_RESPONSE,
+    SERVER,
+    UNKNOWN
 }
 
 // Presentation models deliberately contain no network DTOs or database entities.
@@ -20,11 +25,7 @@ data class SearchItemViewModel(
     val song: Song? = null
 )
 
-data class SearchPageViewModel(
-    val items: List<SearchItemViewModel>,
-    val page: Int,
-    val hasNext: Boolean
-)
+data class SearchPageViewModel(val items: List<SearchItemViewModel>, val page: Int, val hasNext: Boolean)
 
 data class SearchViewModel(
     val query: String = "",

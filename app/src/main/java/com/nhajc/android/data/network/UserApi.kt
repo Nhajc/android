@@ -14,8 +14,5 @@ interface UserApi {
 
     @Multipart
     @PUT("users/me")
-    suspend fun updateMe(
-        @Part("data") request: UpdateProfileRequest,
-        @Part avatar: MultipartBody.Part?
-    ): UserResponse
+    suspend fun updateMe(@Part("data") request: UpdateProfileRequest, @Part avatar: MultipartBody.Part?): UserResponse
 }

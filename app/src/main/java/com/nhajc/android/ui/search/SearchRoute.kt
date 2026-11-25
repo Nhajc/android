@@ -34,7 +34,10 @@ fun SearchRoute(
 
     SearchScreen(
         model = model,
-        onQueryChange = { query = it; controller.updateQuery(it) },
+        onQueryChange = {
+            query = it
+            controller.updateQuery(it)
+        },
         onCategoryChange = {
             controller.selectCategory(it)
             categoryNames = controller.model.value.categories.map { category -> category.name }

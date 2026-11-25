@@ -16,9 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class ArtistViewModel @Inject constructor(
-    private val artistRepository: ArtistRepository
-) : ViewModel() {
+class ArtistViewModel @Inject constructor(private val artistRepository: ArtistRepository) : ViewModel() {
     private val state = MutableStateFlow(ArtistUiState())
     private var requestedArtistId: Uuid? = null
     private var loadJob: Job? = null

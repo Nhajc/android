@@ -10,11 +10,7 @@ data class PageResponse<T>(val content: List<T>, val page: Int, val size: Int, v
 data class IdResponse(val id: Uuid)
 
 @Serializable
-data class ProblemDetail(
-    val title: String? = null,
-    val status: Int? = null,
-    val detail: String? = null
-)
+data class ProblemDetail(val title: String? = null, val status: Int? = null, val detail: String? = null)
 
 @Serializable
 data object UnknownItem : SearchItemResponse, LibraryItemResponse

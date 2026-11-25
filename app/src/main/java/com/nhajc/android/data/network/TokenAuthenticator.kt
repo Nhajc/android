@@ -13,10 +13,8 @@ import okhttp3.Response
 import okhttp3.Route
 import retrofit2.HttpException
 
-class TokenAuthenticator @Inject constructor(
-    private val session: SessionDataStore,
-    private val authApi: AuthApi
-) : Authenticator {
+class TokenAuthenticator @Inject constructor(private val session: SessionDataStore, private val authApi: AuthApi) :
+    Authenticator {
     private val lock = Any()
 
     override fun authenticate(route: Route?, response: Response): Request? {

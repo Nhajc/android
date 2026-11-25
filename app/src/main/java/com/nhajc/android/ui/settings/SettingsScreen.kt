@@ -282,11 +282,7 @@ internal fun SettingsScreen(
     }
 }
 
-private data class SettingsDropdownOption<T>(
-    val value: T,
-    val title: String,
-    val description: String? = null
-)
+private data class SettingsDropdownOption<T>(val value: T, val title: String, val description: String? = null)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -17,8 +17,7 @@ interface SearchRepository {
     ): SearchPageViewModel
 }
 
-class SearchRepositoryException(val reason: SearchError, cause: Throwable? = null) :
-    Exception(reason.name, cause)
+class SearchRepositoryException(val reason: SearchError, cause: Throwable? = null) : Exception(reason.name, cause)
 
 internal fun validateSearch(query: String, page: Int, size: Int): String {
     val trimmed = query.trim()

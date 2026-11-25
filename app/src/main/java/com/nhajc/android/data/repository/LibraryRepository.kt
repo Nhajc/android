@@ -48,11 +48,9 @@ private const val SYNC_PAGE_SIZE = 100
 private const val MIN_QUERY_LENGTH = 3
 
 @Singleton
-class LibraryRepository @Inject constructor(
-    private val libraryApi: LibraryApi,
-    private val database: AppDatabase
-) {
+class LibraryRepository @Inject constructor(private val libraryApi: LibraryApi, private val database: AppDatabase) {
     private val syncMutex = Mutex()
+
     @Volatile private var syncVersion = 0L
     private val libraryDao = database.libraryDao()
     private val userDao = database.userDao()
@@ -217,8 +215,7 @@ private fun searchKey(query: String): String? {
 
 internal fun searchText(text: String): String = StringUtils.stripAccents(text).lowercase()
 
-internal fun UserSummaryResponse.asEntity() =
-    UserEntity(id = id, username = username, avatarUrl = avatarUrl)
+internal fun UserSummaryResponse.asEntity() = UserEntity(id = id, username = username, avatarUrl = avatarUrl)
 
 internal fun ArtistSummaryResponse.asEntity() = ArtistEntity(
     id = id,

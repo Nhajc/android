@@ -8,5 +8,4 @@ import kotlin.uuid.Uuid
 @Entity(tableName = "Users")
 data class UserEntity(@PrimaryKey val id: Uuid, val username: String, val avatarUrl: String?)
 
-fun UserEntity.asModel(): UserSummary =
-    UserSummary(id = id, username = username, avatarUrl = avatarUrl)
+fun UserEntity.asModel(): UserSummary = UserSummary(id = id, username = username, avatarUrl = avatarUrl)
