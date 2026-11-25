@@ -5,6 +5,7 @@ import androidx.room3.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.nhajc.android.BuildConfig
 import com.nhajc.android.data.database.AppDatabase
+import com.nhajc.android.data.database.ArtistDao
 import com.nhajc.android.data.datastore.SessionDataStore
 import com.nhajc.android.data.datastore.sessionDataStore
 import com.nhajc.android.data.network.AdminApi
@@ -128,6 +129,10 @@ object AppModule {
         Room.databaseBuilder(context, AppDatabase::class.java, "nhajc.db")
             .setDriver(BundledSQLiteDriver())
             .build()
+
+    @Provides
+    @Singleton
+    fun artistDao(database: AppDatabase): ArtistDao = database.artistDao()
 }
 
 private fun retrofit(client: OkHttpClient): Retrofit = Retrofit.Builder()
