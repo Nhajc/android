@@ -2,11 +2,12 @@ package com.nhajc.android.ui.home
 
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -16,17 +17,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nhajc.android.R
+import com.nhajc.android.data.model.LibraryTab
 import com.nhajc.android.ui.common.UserAvatarButton
 import com.nhajc.android.ui.theme.NhajcTheme
+import kotlin.uuid.Uuid
 
 @Composable
-fun HomeScreen(onOpenSettings: () -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(
+    onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onOpenLibrary: () -> Unit,
+    onOpenArtist: (Uuid) -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
+    onOpenPlaylist: (Uuid) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HomeScreen(uiState = uiState, onOpenSettings = onOpenSettings)
+    HomeScreen(
+        uiState = uiState, onOpenSettings = onOpenSettings,
+        onOpenSearch = onOpenSearch,
+        onOpenLibrary = { tab -> viewModel.openLibrary(tab, onOpenLibrary) },
+        onOpenArtist = onOpenArtist, onOpenRelease = onOpenRelease,
+        onOpenPlaylist = onOpenPlaylist,
+        onRefresh = viewModel::refresh, onPlayFavorite = viewModel::playFavorite
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +54,14 @@ fun HomeScreen(onOpenSettings: () -> Unit, viewModel: HomeViewModel = hiltViewMo
 internal fun HomeScreen(
     uiState: HomeUiState,
     onOpenSettings: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenSearch: () -> Unit = {},
+    onOpenLibrary: (LibraryTab) -> Unit = {},
+    onOpenArtist: (Uuid) -> Unit = {},
+    onOpenRelease: (Uuid) -> Unit = {},
+    onOpenPlaylist: (Uuid) -> Unit = {},
+    onRefresh: () -> Unit = {},
+    onPlayFavorite: (Uuid) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -51,11 +78,24 @@ internal fun HomeScreen(
                         avatarUrl = uiState.user?.avatarUrl,
                         onClick = onOpenSettings
                     )
+                },
+                actions = {
+                    IconButton(onClick = onRefresh, enabled = !uiState.isRefreshing) {
+                        Icon(Icons.Outlined.Refresh, stringResource(R.string.home_refresh))
+                    }
                 }
             )
         }
     ) { innerPadding ->
-        Box(
+        HomeFeed(
+            uiState = uiState,
+            onOpenSearch = onOpenSearch,
+            onOpenLibrary = onOpenLibrary,
+            onOpenArtist = onOpenArtist,
+            onOpenRelease = onOpenRelease,
+            onOpenPlaylist = onOpenPlaylist,
+            onRefresh = onRefresh,
+            onPlayFavorite = onPlayFavorite,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

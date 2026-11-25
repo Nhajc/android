@@ -221,7 +221,12 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
             entryProvider = entryProvider {
                 entry<HomeNavKey> {
                     HomeScreen(
-                        onOpenSettings = { backStack.add(SettingsNavKey) }
+                        onOpenSettings = { backStack.add(SettingsNavKey) },
+                        onOpenSearch = { backStack.add(SearchNavKey) },
+                        onOpenLibrary = { backStack.add(LibraryNavKey) },
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) },
+                        onOpenRelease = { id -> backStack.add(ReleaseNavKey(id)) },
+                        onOpenPlaylist = { id -> backStack.add(PlaylistNavKey(id)) }
                     )
                 }
 

@@ -258,4 +258,18 @@
     <string name="admin_unsupported_audio">This audio cannot be processed. Use a supported 16-bit FLAC file.</string>
     <string name="admin_server_busy">The server is processing other uploads. Try again shortly.</string>
     <string name="admin_service_unavailable">Media processing or storage is unavailable. Try again later.</string>
+    <string name="home_refresh">Refresh home</string>
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_welcome">Welcome to Nhajc</string>
+    <string name="home_hero_title">A soundtrack for your day</string>
+    <string name="home_hero_description">Find a new favorite or pick up something from your library.</string>
+    <string name="home_loading">Refreshing your library…</string>
+    <string name="home_empty_title">Make yourself at home</string>
+    <string name="home_empty_description">Find music in Search, then save releases and playlists, follow artists or favorite songs. They will appear here. Pull down to refresh after adding new content.</string>
+    <string name="home_cached_content">Your saved content is still shown below.</string>
+    <string name="home_saved_releases">Saved releases</string>
+    <string name="home_playlists">Your playlists</string>
+    <string name="home_followed_artists">Artists you follow</string>
+    <string name="home_favorites">Favorite songs</string>
+    <string name="home_see_all">See all</string>
 </resources>
