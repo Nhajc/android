@@ -59,6 +59,17 @@ class PlaybackController @Inject constructor(
         player.play()
     }
 
+    suspend fun shuffle(songs: List<Song>) {
+        if (songs.isEmpty()) {
+            return
+        }
+
+        val player = player.filterNotNull().first()
+
+        player.shuffleModeEnabled = true
+        play(songs, songs.indices.random())
+    }
+
     private fun onConnected(controller: MediaController) {
         mutablePlayer.value = controller
 

@@ -75,6 +75,7 @@ fun ReleaseWithArtists.asModel(): Release {
         releaseType = release.info.releaseType,
         releaseDate = release.info.releaseDate,
         coverUrl = release.info.coverUrl,
-        artists = sortedArtists.map { it.asModel() }
+        artists = sortedArtists.map { it.asModel() },
+        isSaved = release.info.lastActivityAt != null
     )
 }

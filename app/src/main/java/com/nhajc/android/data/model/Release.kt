@@ -9,7 +9,8 @@ data class Release(
     val releaseType: ReleaseType,
     val releaseDate: LocalDate,
     val coverUrl: String?,
-    val artists: List<ArtistSummary>
+    val artists: List<ArtistSummary>,
+    val isSaved: Boolean
 )
 
 enum class ReleaseType { ALBUM, SINGLE, EP, COMPILATION, UNKNOWN }

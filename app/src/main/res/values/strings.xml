@@ -51,6 +51,8 @@
     <string name="error_network">Can\'t reach Nhajc. Try again.</string>
     <string name="error_server">Nhajc is having problems. Try again later.</string>
     <string name="error_playlist_limit">You can have up to 200 playlists.</string>
+    <string name="error_not_found">This is no longer available.</string>
+    <string name="try_again">Try again</string>
     <string name="close_search">Close search</string>
     <string name="find_in_library">Find in library</string>
     <string name="find_in_downloads">Find in downloads</string>
@@ -88,6 +90,12 @@
     <string name="download">Download</string>
     <string name="add_to_favorites">Add to favorites</string>
     <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="play">Play</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="save_to_library">Save to library</string>
+    <string name="remove_from_library">Remove from library</string>
+    <string name="release_subtitle">%1$s · %2$d</string>
+    <string name="release_no_songs">No songs yet.</string>
     <string name="artist_title">Artist</string>
     <string name="artist_loading">Loading artist…</string>
     <string name="artist_retry">Try again</string>

@@ -3,6 +3,7 @@ package com.nhajc.android.ui.artist
 import android.content.res.Configuration
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,7 @@ import kotlinx.datetime.LocalDate
 fun ArtistScreen(
     artistId: Uuid,
     onBack: () -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
     viewModel: ArtistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,7 +80,8 @@ fun ArtistScreen(
         uiState = uiState,
         onBack = onBack,
         onRetry = viewModel::retry,
-        onToggleFollow = viewModel::toggleFollow
+        onToggleFollow = viewModel::toggleFollow,
+        onOpenRelease = onOpenRelease
     )
 }
 
@@ -89,6 +92,7 @@ internal fun ArtistScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onToggleFollow: () -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -185,7 +189,7 @@ internal fun ArtistScreen(
                     }
 
                     items(artist.releases, key = { it.id.toString() }) { release ->
-                        ArtistReleaseItem(release)
+                        ArtistReleaseItem(release, onClick = { onOpenRelease(release.id) })
                     }
                 }
             }
@@ -249,7 +253,7 @@ private fun ArtistHeader(artist: Artist, isUpdatingFollow: Boolean, onToggleFoll
 }
 
 @Composable
-private fun ArtistReleaseItem(release: ArtistRelease) {
+private fun ArtistReleaseItem(release: ArtistRelease, onClick: () -> Unit) {
     val songCount = pluralStringResource(
         R.plurals.artist_song_count,
         release.songCount,
@@ -257,7 +261,9 @@ private fun ArtistReleaseItem(release: ArtistRelease) {
     )
 
     ListItem(
-        modifier = Modifier.clip(MaterialTheme.shapes.medium),
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick),
         headlineContent = {
             Text(release.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
         },
@@ -341,7 +347,8 @@ private fun ArtistScreenPreview() {
             uiState = ArtistUiState(artist = artist, isLoading = false),
             onBack = {},
             onRetry = {},
-            onToggleFollow = {}
+            onToggleFollow = {},
+            onOpenRelease = {}
         )
     }
 }

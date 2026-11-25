@@ -221,7 +221,7 @@ internal fun searchText(text: String): String = StringUtils.stripAccents(text).l
 private fun UserSummaryResponse.asEntity() =
     UserEntity(id = id, username = username, avatarUrl = avatarUrl)
 
-private fun ArtistSummaryResponse.asEntity() = ArtistEntity(
+internal fun ArtistSummaryResponse.asEntity() = ArtistEntity(
     id = id,
     name = name,
     searchName = searchText(name),

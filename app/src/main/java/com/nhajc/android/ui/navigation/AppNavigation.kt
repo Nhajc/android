@@ -59,6 +59,7 @@ import com.nhajc.android.ui.home.HomeScreen
 import com.nhajc.android.ui.library.LibraryScreen
 import com.nhajc.android.ui.player.MiniPlayer
 import com.nhajc.android.ui.player.PlayerScreen
+import com.nhajc.android.ui.release.ReleaseScreen
 import com.nhajc.android.ui.search.SearchRoute
 import com.nhajc.android.ui.settings.SettingsScreen
 import kotlin.uuid.Uuid
@@ -93,6 +94,9 @@ data object PlayerNavKey : NavKey
 
 @Serializable
 data class ArtistNavKey(val id: Uuid) : NavKey
+
+@Serializable
+data class ReleaseNavKey(val id: Uuid) : NavKey
 
 private enum class TopLevelDestination(
     val navKey: NavKey,
@@ -220,7 +224,8 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                 entry<SearchNavKey>(metadata = fadeThroughMetadata()) {
                     SearchRoute(
                         repository = searchRepository,
-                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) }
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) },
+                        onOpenRelease = { id -> backStack.add(ReleaseNavKey(id)) }
                     )
                 }
 
@@ -228,7 +233,8 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                     LibraryScreen(
                         onOpenSettings = { backStack.add(SettingsNavKey) },
                         onOpenDownloads = { backStack.add(DownloadsNavKey) },
-                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) }
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) },
+                        onOpenRelease = { id -> backStack.add(ReleaseNavKey(id)) }
                     )
                 }
 
@@ -252,12 +258,25 @@ internal fun MainNavigationContent(searchRepository: SearchRepository, isAdmin: 
                 entry<PlayerNavKey> {
                     PlayerScreen(
                         onClose = { backStack.removeLastOrNull() },
-                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) }
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) },
+                        onOpenRelease = { id -> backStack.add(ReleaseNavKey(id)) }
                     )
                 }
 
                 entry<ArtistNavKey> { key ->
-                    ArtistScreen(artistId = key.id, onBack = { backStack.removeLastOrNull() })
+                    ArtistScreen(
+                        artistId = key.id,
+                        onBack = { backStack.removeLastOrNull() },
+                        onOpenRelease = { id -> backStack.add(ReleaseNavKey(id)) }
+                    )
+                }
+
+                entry<ReleaseNavKey> { key ->
+                    ReleaseScreen(
+                        releaseId = key.id,
+                        onBack = { backStack.removeLastOrNull() },
+                        onOpenArtist = { id -> backStack.add(ArtistNavKey(id)) }
+                    )
                 }
             }
         )

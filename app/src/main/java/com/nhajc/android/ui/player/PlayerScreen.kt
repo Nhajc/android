@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -17,20 +16,14 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Album
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,13 +31,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -67,8 +58,9 @@ import androidx.media3.ui.compose.material3.indicator.PositionText
 import androidx.media3.ui.compose.material3.indicator.ProgressSlider
 import androidx.media3.ui.compose.state.rememberCurrentMediaItemState
 import com.nhajc.android.R
-import com.nhajc.android.data.model.ArtistSummary
+import com.nhajc.android.ui.common.ArtistLine
 import com.nhajc.android.ui.common.CoverImage
+import com.nhajc.android.ui.common.SongMenuButton
 import com.nhajc.android.ui.common.message
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.launch
@@ -77,6 +69,7 @@ import kotlinx.coroutines.launch
 fun PlayerScreen(
     onClose: () -> Unit,
     onOpenArtist: (Uuid) -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
     viewModel: PlayerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -95,7 +88,8 @@ fun PlayerScreen(
         onFavoriteClick = viewModel::onFavoriteClick,
         onErrorShown = viewModel::onErrorShown,
         onClose = onClose,
-        onOpenArtist = onOpenArtist
+        onOpenArtist = onOpenArtist,
+        onOpenRelease = onOpenRelease
     )
 }
 
@@ -110,6 +104,7 @@ internal fun PlayerScreen(
     onErrorShown: () -> Unit,
     onClose: () -> Unit,
     onOpenArtist: (Uuid) -> Unit,
+    onOpenRelease: (Uuid) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val mediaItemState = rememberCurrentMediaItemState(player)
@@ -162,8 +157,18 @@ internal fun PlayerScreen(
             )
         },
         topBar = {
-            TopAppBar(
-                title = {},
+            CenterAlignedTopAppBar(
+                title = {
+                    if (song != null) {
+                        Text(
+                            text = song.releaseTitle,
+                            modifier = Modifier.clickable { onOpenRelease(song.releaseId) },
+                            style = MaterialTheme.typography.titleSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(
@@ -260,55 +265,6 @@ internal fun PlayerScreen(
 }
 
 @Composable
-private fun ArtistLine(artists: List<ArtistSummary>, onOpenArtist: (Uuid) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier.clickable {
-            if (artists.size == 1) {
-                onOpenArtist(artists.first().id)
-            } else {
-                expanded = true
-            }
-        },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Box {
-            for ((index, artist) in artists.take(MAX_AVATARS).withIndex()) {
-                CoverImage(
-                    url = artist.avatarUrl,
-                    fallbackIcon = Icons.Outlined.Person,
-                    modifier = Modifier
-                        .padding(start = (index * AVATAR_OFFSET).dp)
-                        .size(24.dp),
-                    shape = CircleShape
-                )
-            }
-        }
-
-        Text(
-            text = artists.joinToString(", ") { it.name },
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            for (artist in artists) {
-                DropdownMenuItem(
-                    text = { Text(artist.name) },
-                    onClick = {
-                        expanded = false
-                        onOpenArtist(artist.id)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun FavoriteButton(isFavorite: Boolean, enabled: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick, enabled = enabled) {
         if (isFavorite) {
@@ -326,58 +282,4 @@ private fun FavoriteButton(isFavorite: Boolean, enabled: Boolean, onClick: () ->
     }
 }
 
-@Composable
-private fun SongMenuButton(
-    isFavorite: Boolean,
-    isFavoriteEnabled: Boolean,
-    onFavoriteClick: () -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                Icons.Outlined.MoreVert,
-                contentDescription = stringResource(R.string.more_options)
-            )
-        }
-
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            val favoriteText = if (isFavorite) {
-                R.string.remove_from_favorites
-            } else {
-                R.string.add_to_favorites
-            }
-
-            DropdownMenuItem(
-                text = { Text(stringResource(favoriteText)) },
-                leadingIcon = { Icon(Icons.Outlined.FavoriteBorder, contentDescription = null) },
-                enabled = isFavoriteEnabled,
-                onClick = {
-                    expanded = false
-                    onFavoriteClick()
-                }
-            )
-
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.add_to_playlist)) },
-                leadingIcon = {
-                    Icon(Icons.AutoMirrored.Outlined.PlaylistAdd, contentDescription = null)
-                },
-                // TODO: pick one of the user's playlists, then add the song with #31
-                onClick = { expanded = false }
-            )
-
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.download)) },
-                leadingIcon = { Icon(Icons.Outlined.Download, contentDescription = null) },
-                // TODO: download the song (Media3 DownloadManager, downloads branch)
-                onClick = { expanded = false }
-            )
-        }
-    }
-}
-
 private const val SHEET_PEEK_HEIGHT = 48
-private const val MAX_AVATARS = 3
-private const val AVATAR_OFFSET = 16
