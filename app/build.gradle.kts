@@ -11,6 +11,10 @@ room3 {
     schemaDirectory("$projectDir/schemas")
 }
 
+tasks.named("preBuild") {
+    dependsOn("ktlintFormat")
+}
+
 android {
     namespace = "com.nhajc.android"
     compileSdk {
