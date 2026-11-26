@@ -22,4 +22,4 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - run: ./gradlew assembleDebug testDebugUnitTest
+      - run: ./gradlew assembleDebug testDebugUnitTest -x ktlintFormat
